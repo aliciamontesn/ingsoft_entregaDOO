@@ -1,0 +1,22 @@
+package com.grupok.publicaciones.repository;
+
+import com.grupok.publicaciones.model.Pregunta;
+import com.grupok.publicaciones.model.Publicacion;
+import com.grupok.publicaciones.model.Respuesta;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.util.Optional;
+
+// CU2 — seq_cu2: ReporteService → :PublicacionRepository
+// CU4 — seq_cu4: RespuestaService → :PublicacionRepository
+public interface PublicacionRepository extends JpaRepository<Publicacion, Long> {
+
+    // CU4: buscarPreguntaPorRespuesta(respuestaId)
+    @Query("SELECT r.pregunta FROM Respuesta r WHERE r.id = :respuestaId")
+    Optional<Pregunta> findPreguntaByRespuestaId(@Param("respuestaId") Long respuestaId);
+
+    // CU4: marcarRespuestaAceptada(respuestaId) — se obtiene la Respuesta y se modifica en el Service
+    Optional<Respuesta> findRespuestaById(Long id);
+}
