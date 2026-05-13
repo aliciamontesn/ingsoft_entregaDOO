@@ -3,7 +3,9 @@ package com.grupok.publicaciones.service;
 import com.grupok.publicaciones.model.Reporte;
 import com.grupok.publicaciones.repository.PublicacionRepository;
 import com.grupok.publicaciones.repository.ReporteRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 // CU2 — seq_cu2: :ReporteController → :ReporteService
 @Service
@@ -21,7 +23,7 @@ public class ReporteService {
     // CU2: reportarPublicacion(usuarioId, publicacionId, motivo)
     public Reporte reportarPublicacion(Long usuarioId, Long publicacionId, String motivo) {
         publicacionRepository.findById(publicacionId)
-                .orElseThrow(() -> new IllegalArgumentException("Publicación no encontrada: " + publicacionId));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Publicación no encontrada: " + publicacionId));
 
         Reporte reporte = new Reporte();
         reporte.setUsuarioId(usuarioId);

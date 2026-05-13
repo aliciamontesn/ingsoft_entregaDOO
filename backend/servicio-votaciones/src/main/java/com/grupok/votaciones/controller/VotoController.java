@@ -1,5 +1,6 @@
 package com.grupok.votaciones.controller;
 
+import com.grupok.votaciones.dto.EmitirVotoRequest;
 import com.grupok.votaciones.service.VotoService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,12 +19,8 @@ public class VotoController {
 
     // CU1: POST /votos {usuarioId, respuestaId, valor}
     @PostMapping("/votos")
-    public ResponseEntity<Map<String, Object>> emitirVoto(@RequestBody Map<String, Object> body) {
-        Long usuarioId = Long.valueOf(body.get("usuarioId").toString());
-        Long respuestaId = Long.valueOf(body.get("respuestaId").toString());
-        int valor = Integer.parseInt(body.get("valor").toString());
-
-        int nuevoScore = votoService.emitirVoto(usuarioId, respuestaId, valor);
+    public ResponseEntity<Map<String, Object>> emitirVoto(@RequestBody EmitirVotoRequest request) {
+        int nuevoScore = votoService.emitirVoto(request.usuarioId(), request.respuestaId(), request.valor());
         return ResponseEntity.ok(Map.of("nuevoScore", nuevoScore));
     }
 }

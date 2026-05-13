@@ -1,10 +1,9 @@
 package com.grupok.publicaciones.controller;
 
+import com.grupok.publicaciones.dto.AceptarRespuestaRequest;
 import com.grupok.publicaciones.service.RespuestaService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 // CU4 — seq_cu4: API de Publicaciones → :RespuestaController
 @RestController
@@ -19,9 +18,8 @@ public class RespuestaController {
     // CU4: PATCH /respuestas/{id}/aceptar {usuarioId}
     @PatchMapping("/respuestas/{id}/aceptar")
     public ResponseEntity<Void> aceptarRespuesta(@PathVariable Long id,
-                                                 @RequestBody Map<String, Object> body) {
-        Long usuarioId = Long.valueOf(body.get("usuarioId").toString());
-        respuestaService.aceptarRespuesta(usuarioId, id);
+                                                 @RequestBody AceptarRespuestaRequest request) {
+        respuestaService.aceptarRespuesta(request.usuarioId(), id);
         return ResponseEntity.ok().build();
     }
 }

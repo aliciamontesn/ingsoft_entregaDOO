@@ -4,8 +4,10 @@ import com.grupok.votaciones.fake.FakeMessageBroker;
 import com.grupok.votaciones.model.Voto;
 import com.grupok.votaciones.repository.VotoRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 
 // CU1 — seq_cu1: :VotoController → :VotoService
 @Service
@@ -30,7 +32,7 @@ public class VotoService {
     public int emitirVoto(Long usuarioId, Long respuestaId, int valor) {
         // CU1: buscarVotoPrevio(usuarioId, respuestaId)
         votoRepository.findByUsuarioIdAndRespuestaId(usuarioId, respuestaId)
-                .ifPresent(v -> { throw new IllegalStateException("El usuario ya votó esta publicación"); });
+                .ifPresent(v -> { throw new ResponseStatusException(HttpStatus.CONFLICT, "El usuario ya votó esta publicación"); });
 
         // CU1: guardar(Voto)
         Voto voto = new Voto();
