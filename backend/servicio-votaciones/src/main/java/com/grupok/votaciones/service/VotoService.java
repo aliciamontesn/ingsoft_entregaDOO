@@ -62,6 +62,7 @@ public class VotoService {
         // CU1 extensiones 4a/4b: lógica de voto previo
         Optional<Voto> votoExistente = votoRepository.findByUsuarioIdAndRespuestaId(usuarioId, respuestaId);
         int delta;
+        String evento;
 
         if (votoExistente.isPresent()) {
             Voto voto = votoExistente.get();
@@ -69,12 +70,14 @@ public class VotoService {
                 // Extensión 4a: mismo voto → retirar
                 votoRepository.delete(voto);
                 delta = -valor;
+                evento = "VotoRetirado";
             } else {
                 // Extensión 4b: voto contrario → sustituir
                 int oldValor = voto.getValor();
                 voto.setValor(valor);
                 votoRepository.save(voto);
                 delta = valor - oldValor;
+                evento = "VotoCambiado";
             }
         } else {
             Voto voto = new Voto();
@@ -83,13 +86,14 @@ public class VotoService {
             voto.setValor(valor);
             votoRepository.save(voto);
             delta = valor;
+            evento = "VotoEmitido";
         }
 
         // Actualizar score en servicio-publicaciones
         String urlScore = publicacionesUrl + "/publicaciones/" + respuestaId + "/score";
         Integer nuevoScore = restTemplate.patchForObject(urlScore, delta, Integer.class);
 
-        fakeMessageBroker.publish("VotoEmitido", respuestaId);
+        fakeMessageBroker.publish(evento, respuestaId);
 
         return nuevoScore != null ? nuevoScore : 0;
     }

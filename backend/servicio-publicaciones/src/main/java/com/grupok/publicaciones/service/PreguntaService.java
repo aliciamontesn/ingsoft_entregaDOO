@@ -80,9 +80,13 @@ public class PreguntaService {
         if (pregunta.getEstado() == EstadoPublicacion.ELIMINADA) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Pregunta no encontrada: " + preguntaId);
         }
+        if (pregunta.getEstado() == EstadoPublicacion.OCULTA) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Publicación bajo revisión");
+        }
 
         List<Respuesta> respuestas = respuestaRepository.findByPreguntaId(preguntaId).stream()
-                .filter(r -> r.getEstado() != EstadoPublicacion.ELIMINADA)
+                .filter(r -> r.getEstado() != EstadoPublicacion.ELIMINADA
+                          && r.getEstado() != EstadoPublicacion.OCULTA)
                 .collect(Collectors.toList());
 
         return new PreguntaDetalleDto(pregunta, respuestas);

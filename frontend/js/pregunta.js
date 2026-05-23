@@ -80,9 +80,10 @@ function renderRespuestas() {
   }
 
   cont.innerHTML = rs.map(r => {
-    const aceptada    = r.esAceptada || r.id === q.acceptedAnswerId;
-    const puedeAceptar = esAutorPregunta && !hayAceptada && !aceptada;
-    const puedeBorrar  = r.autorId === uid || esAutorPregunta;
+    const aceptada       = r.esAceptada || r.id === q.acceptedAnswerId;
+    const puedeAceptar   = esAutorPregunta && !hayAceptada && !aceptada;
+    const puedeDesaceptar = esAutorPregunta && aceptada;
+    const puedeBorrar    = r.autorId === uid || esAutorPregunta;
     return `
       <div class="answer-card ${aceptada ? 'accepted-answer' : ''}" id="ans-${r.id}">
         ${aceptada ? '<div class="accepted-label">✓ Respuesta aceptada</div>' : ''}
@@ -98,6 +99,9 @@ function renderRespuestas() {
               <button class="btn btn-ghost btn-sm" onclick="reportar(${r.id})">⚑ Reportar</button>
               ${puedeAceptar
                 ? `<button class="btn btn-accept btn-sm" onclick="aceptar(${r.id})">✓ Aceptar</button>`
+                : ''}
+              ${puedeDesaceptar
+                ? `<button class="btn btn-ghost btn-sm" onclick="desaceptar(${r.id})">✕ Quitar aceptada</button>`
                 : ''}
               ${puedeBorrar
                 ? `<button class="btn btn-ghost btn-sm" style="color:var(--danger)"
@@ -124,10 +128,22 @@ async function votar(respuestaId, valor) {
 
 /* CU4 — aceptar respuesta */
 async function aceptar(respuestaId) {
-  if (!confirm('¿Marcar esta respuesta como aceptada? No podrás cambiarlo.')) return;
+  if (!confirm('¿Marcar esta respuesta como aceptada?')) return;
   try {
     await api.aceptarRespuesta(respuestaId, getCurrentUserId());
     toast('Respuesta aceptada ✓', 'ok');
+    await cargar(getPreguntaId());
+  } catch (e) {
+    toast(e.message, 'err');
+  }
+}
+
+/* CU4 ext.5a.2 — quitar respuesta aceptada */
+async function desaceptar(respuestaId) {
+  if (!confirm('¿Quitar la aceptación de esta respuesta?')) return;
+  try {
+    await api.desaceptarRespuesta(respuestaId, getCurrentUserId());
+    toast('Aceptación retirada', 'ok');
     await cargar(getPreguntaId());
   } catch (e) {
     toast(e.message, 'err');

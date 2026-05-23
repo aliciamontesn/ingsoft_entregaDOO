@@ -40,7 +40,7 @@ public class RespuestaService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Solo el autor de la pregunta puede aceptar una respuesta");
         }
         if (pregunta.getAcceptedAnswerId() != null) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "La pregunta ya tiene una respuesta aceptada");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "La pregunta ya tiene una respuesta aceptada. Puedes quitarla primero.");
         }
 
         Respuesta respuesta = respuestaRepository.findById(respuestaId)
@@ -53,6 +53,29 @@ public class RespuestaService {
         fakeMessageBroker.publish("respuesta_aceptada", respuestaId);
     }
 
+    // CU4 ext.5a.2: desaceptarRespuesta(usuarioId, respuestaId)
+    @Transactional
+    public void desaceptarRespuesta(Long usuarioId, Long respuestaId) {
+        Pregunta pregunta = publicacionRepository.findPreguntaByRespuestaId(respuestaId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Respuesta no encontrada: " + respuestaId));
+
+        if (!pregunta.getAutorId().equals(usuarioId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Solo el autor de la pregunta puede quitar la respuesta aceptada");
+        }
+        if (!respuestaId.equals(pregunta.getAcceptedAnswerId())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Esta respuesta no es la respuesta aceptada");
+        }
+
+        Respuesta respuesta = respuestaRepository.findById(respuestaId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Respuesta no encontrada: " + respuestaId));
+        respuesta.setEsAceptada(false);
+        pregunta.setAcceptedAnswerId(null);
+
+        respuestaRepository.save(respuesta);
+        publicacionRepository.save(pregunta);
+        fakeMessageBroker.publish("respuesta_desaceptada", respuestaId);
+    }
+
     @Transactional
     public Respuesta publicarRespuesta(Long usuarioId, Long preguntaId, String contenido) {
         Pregunta pregunta = preguntaRepository.findById(preguntaId)
@@ -60,6 +83,9 @@ public class RespuestaService {
 
         if (pregunta.getEstado() == EstadoPublicacion.ELIMINADA) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Pregunta no encontrada: " + preguntaId);
+        }
+        if (pregunta.getEstado() == EstadoPublicacion.OCULTA) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No se puede responder una publicación bajo revisión");
         }
         if (pregunta.getAutorId().equals(usuarioId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No puedes responder tu propia pregunta");

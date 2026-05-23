@@ -18,10 +18,16 @@ public class FakeMessageBroker {
 
     public void publish(String evento, Long id) {
         System.out.printf("[FakeMessageBroker] publish evento='%s' id=%d%n", evento, id);
-        // CU1: consumidores de VotoEmitido
-        if ("VotoEmitido".equals(evento)) {
-            fakeServicioReputacion.actualizarReputacion(id, 0);
-            fakeServicioNotificaciones.notificarAutorVoto(id);
+        switch (evento) {
+            // CU1: voto nuevo
+            case "VotoEmitido" -> {
+                fakeServicioReputacion.actualizarReputacion(id, 0);
+                fakeServicioNotificaciones.notificarAutorVoto(id);
+            }
+            // CU1 ext.4a: voto retirado
+            case "VotoRetirado" -> fakeServicioReputacion.actualizarReputacion(id, 0);
+            // CU1 ext.4b: voto cambiado
+            case "VotoCambiado" -> fakeServicioReputacion.actualizarReputacion(id, 0);
         }
     }
 }

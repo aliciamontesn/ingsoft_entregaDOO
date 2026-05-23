@@ -37,6 +37,13 @@ public class RespuestaController {
         return ResponseEntity.ok().build();
     }
 
+    @PatchMapping("/respuestas/{id}/desaceptar")
+    public ResponseEntity<Void> desaceptarRespuesta(@PathVariable Long id,
+                                                     @Valid @RequestBody AceptarRespuestaRequest request) {
+        respuestaService.desaceptarRespuesta(request.usuarioId(), id);
+        return ResponseEntity.ok().build();
+    }
+
     @DeleteMapping("/respuestas/{id}")
     public ResponseEntity<Void> eliminarRespuesta(@PathVariable Long id,
                                                    @RequestParam Long usuarioId) {

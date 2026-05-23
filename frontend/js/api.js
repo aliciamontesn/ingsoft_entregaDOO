@@ -52,7 +52,9 @@ const api = {
   publicarRespuesta:  (data)      => apiFetch(`${API_PUB}/respuestas`, { method:'POST', body:JSON.stringify(data) }),
   eliminarRespuesta:  (id, uid)   => apiFetch(`${API_PUB}/respuestas/${id}?usuarioId=${uid}`, { method:'DELETE' }),
 
-  aceptarRespuesta: (id, uid) => apiFetch(`${API_PUB}/respuestas/${id}/aceptar`,
+  aceptarRespuesta:    (id, uid) => apiFetch(`${API_PUB}/respuestas/${id}/aceptar`,
+    { method:'PATCH', body:JSON.stringify({ usuarioId: uid }) }),
+  desaceptarRespuesta: (id, uid) => apiFetch(`${API_PUB}/respuestas/${id}/desaceptar`,
     { method:'PATCH', body:JSON.stringify({ usuarioId: uid }) }),
 
   reportar: (pubId, uid, motivo) => apiFetch(`${API_PUB}/publicaciones/${pubId}/reportes`,

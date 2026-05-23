@@ -36,6 +36,12 @@ public class FakeMessageBroker {
                 fakeProyectorCQRS.actualizarModeloLectura(evento, id);
                 fakeServicioNotificaciones.notificarAutorRespuesta(id);
             }
+            // CU2 ext.6a: publicación auto-ocultada por exceso de reportes
+            case "publicacion_ocultada" -> {
+                fakeServicioBusqueda.eliminarDelIndice(id);
+                fakeServicioNotificaciones.notificarAdministradores(id);
+                fakeProyectorCQRS.actualizarModeloLectura(evento, id);
+            }
         }
     }
 }

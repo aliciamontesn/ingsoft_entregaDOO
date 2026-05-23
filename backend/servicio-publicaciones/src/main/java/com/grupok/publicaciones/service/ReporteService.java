@@ -1,6 +1,7 @@
 package com.grupok.publicaciones.service;
 
 import com.grupok.publicaciones.dto.ReporteResultadoDto;
+import com.grupok.publicaciones.fake.FakeMessageBroker;
 import com.grupok.publicaciones.model.EstadoPublicacion;
 import com.grupok.publicaciones.model.Reporte;
 import com.grupok.publicaciones.repository.PublicacionRepository;
@@ -18,11 +19,14 @@ public class ReporteService {
 
     private final PublicacionRepository publicacionRepository;
     private final ReporteRepository reporteRepository;
+    private final FakeMessageBroker fakeMessageBroker;
 
     public ReporteService(PublicacionRepository publicacionRepository,
-                          ReporteRepository reporteRepository) {
+                          ReporteRepository reporteRepository,
+                          FakeMessageBroker fakeMessageBroker) {
         this.publicacionRepository = publicacionRepository;
         this.reporteRepository = reporteRepository;
+        this.fakeMessageBroker = fakeMessageBroker;
     }
 
     // CU2: reportarPublicacion(usuarioId, publicacionId, motivo)
@@ -54,6 +58,7 @@ public class ReporteService {
             publicacion.setEstado(EstadoPublicacion.OCULTA);
             publicacionRepository.save(publicacion);
             oculta = true;
+            fakeMessageBroker.publish("publicacion_ocultada", publicacionId);
         }
 
         int reportesRestantes = (int) Math.max(0, LIMITE_REPORTES - numReportes);
