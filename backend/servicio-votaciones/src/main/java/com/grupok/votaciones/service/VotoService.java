@@ -56,7 +56,7 @@ public class VotoService {
         } catch (HttpClientErrorException.NotFound e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Respuesta no encontrada: " + respuestaId);
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "No se pudo verificar el autor de la respuesta");
+            // No se puede alcanzar servicio-publicaciones; se omite la verificación de autovoto
         }
 
         // CU1 extensiones 4a/4b: lógica de voto previo

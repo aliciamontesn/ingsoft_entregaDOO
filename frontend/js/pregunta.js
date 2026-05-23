@@ -139,8 +139,8 @@ async function reportarPregunta() {
   const motivo = prompt('Motivo del reporte:');
   if (!motivo?.trim()) return;
   try {
-    await api.reportar(detalle.pregunta.id, getCurrentUserId(), motivo);
-    toast('Reporte enviado', 'ok');
+    const res = await api.reportar(detalle.pregunta.id, getCurrentUserId(), motivo);
+    mostrarToastReporte(res);
   } catch (e) {
     toast(e.message, 'err');
   }
@@ -150,10 +150,23 @@ async function reportar(publicacionId) {
   const motivo = prompt('Motivo del reporte:');
   if (!motivo?.trim()) return;
   try {
-    await api.reportar(publicacionId, getCurrentUserId(), motivo);
-    toast('Reporte enviado', 'ok');
+    const res = await api.reportar(publicacionId, getCurrentUserId(), motivo);
+    mostrarToastReporte(res);
   } catch (e) {
     toast(e.message, 'err');
+  }
+}
+
+function mostrarToastReporte(res) {
+  if (res.publicacionOculta) {
+    toast('La publicación ha sido ocultada por exceso de reportes', 'ok');
+    setTimeout(() => cargar(getPreguntaId()), 800);
+  } else if (res.reportesRestantes === 1) {
+    toast('Reporte enviado. Con 1 reporte más esta publicación será ocultada.', 'ok');
+  } else if (res.reportesRestantes === 2) {
+    toast('Reporte enviado. Faltan ' + res.reportesRestantes + ' reportes para ocultar la publicación.', 'ok');
+  } else {
+    toast('Reporte enviado', 'ok');
   }
 }
 

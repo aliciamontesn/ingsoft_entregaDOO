@@ -1,5 +1,6 @@
 package com.grupok.publicaciones.service;
 
+import com.grupok.publicaciones.dto.ReporteResultadoDto;
 import com.grupok.publicaciones.model.EstadoPublicacion;
 import com.grupok.publicaciones.model.Reporte;
 import com.grupok.publicaciones.repository.PublicacionRepository;
@@ -26,9 +27,17 @@ public class ReporteService {
 
     // CU2: reportarPublicacion(usuarioId, publicacionId, motivo)
     @Transactional
-    public Reporte reportarPublicacion(Long usuarioId, Long publicacionId, String motivo) {
+    public ReporteResultadoDto reportarPublicacion(Long usuarioId, Long publicacionId, String motivo) {
         var publicacion = publicacionRepository.findById(publicacionId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Publicación no encontrada: " + publicacionId));
+
+        if (usuarioId.equals(publicacion.getAutorId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No puedes reportar tu propia publicación");
+        }
+
+        if (reporteRepository.existsByUsuarioIdAndPublicacionId(usuarioId, publicacionId)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya has reportado esta publicación");
+        }
 
         Reporte reporte = new Reporte();
         reporte.setUsuarioId(usuarioId);
@@ -38,13 +47,16 @@ public class ReporteService {
 
         // CU2 extensión 6a: auto-ocultar si se supera el límite de reportes
         long numReportes = reporteRepository.countByPublicacionId(publicacionId);
+        boolean oculta = false;
         EstadoPublicacion estadoActual = publicacion.getEstado();
         if (numReportes >= LIMITE_REPORTES
                 && (estadoActual == null || estadoActual == EstadoPublicacion.VISIBLE)) {
             publicacion.setEstado(EstadoPublicacion.OCULTA);
             publicacionRepository.save(publicacion);
+            oculta = true;
         }
 
-        return reporte;
+        int reportesRestantes = (int) Math.max(0, LIMITE_REPORTES - numReportes);
+        return new ReporteResultadoDto(numReportes, reportesRestantes, oculta);
     }
 }

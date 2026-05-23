@@ -1,7 +1,7 @@
 package com.grupok.publicaciones.controller;
 
 import com.grupok.publicaciones.dto.ReportarPublicacionRequest;
-import com.grupok.publicaciones.model.Reporte;
+import com.grupok.publicaciones.dto.ReporteResultadoDto;
 import com.grupok.publicaciones.service.ReporteService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -19,9 +19,9 @@ public class ReporteController {
 
     // CU2: POST /publicaciones/{id}/reportes {usuarioId, motivo}
     @PostMapping("/publicaciones/{id}/reportes")
-    public ResponseEntity<Reporte> reportarPublicacion(@PathVariable Long id,
-                                                       @Valid @RequestBody ReportarPublicacionRequest request) {
-        Reporte reporte = reporteService.reportarPublicacion(request.usuarioId(), id, request.motivo());
-        return ResponseEntity.ok(reporte);
+    public ResponseEntity<ReporteResultadoDto> reportarPublicacion(@PathVariable Long id,
+                                                                   @Valid @RequestBody ReportarPublicacionRequest request) {
+        ReporteResultadoDto resultado = reporteService.reportarPublicacion(request.usuarioId(), id, request.motivo());
+        return ResponseEntity.ok(resultado);
     }
 }

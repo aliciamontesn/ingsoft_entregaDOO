@@ -8,4 +8,6 @@ public interface ReporteRepository extends JpaRepository<Reporte, Long> {
 
     // CU2: contarPorPublicacion(publicacionId)
     long countByPublicacionId(Long publicacionId);
+
+    boolean existsByUsuarioIdAndPublicacionId(Long usuarioId, Long publicacionId);
 }
