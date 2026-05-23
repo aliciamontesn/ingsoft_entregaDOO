@@ -2,6 +2,6 @@
 // LOCAL: dejar como esta
 // PRODUCCION: cambiar por las URLs de Railway antes de subir a Netlify
 window.CONF = {
-  API_PUB: 'http://localhost:8081',
-  API_VOT: 'http://localhost:8082'
+  API_PUB: 'https://publicaciones-production.up.railway.app',
+  API_VOT: 'https://votaciones-production.up.railway.app'
 };
