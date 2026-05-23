@@ -10,4 +10,7 @@ public interface VotoRepository extends JpaRepository<Voto, Long> {
 
     // CU1: buscarVotoPrevio(usuarioId, respuestaId)
     Optional<Voto> findByUsuarioIdAndRespuestaId(Long usuarioId, Long respuestaId);
+
+    // CU1: calcular score local cuando servicio-publicaciones no está disponible
+    java.util.List<Voto> findAllByRespuestaId(Long respuestaId);
 }

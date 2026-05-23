@@ -89,12 +89,20 @@ public class VotoService {
             evento = "VotoEmitido";
         }
 
-        // Actualizar score en servicio-publicaciones
-        String urlScore = publicacionesUrl + "/publicaciones/" + respuestaId + "/score";
-        Integer nuevoScore = restTemplate.patchForObject(urlScore, delta, Integer.class);
+        // Actualizar score en servicio-publicaciones (puede no estar accesible en Railway)
+        int nuevoScore;
+        try {
+            String urlScore = publicacionesUrl + "/publicaciones/" + respuestaId + "/score";
+            Integer scoreRemoto = restTemplate.patchForObject(urlScore, delta, Integer.class);
+            nuevoScore = scoreRemoto != null ? scoreRemoto : 0;
+        } catch (Exception e) {
+            // servicio-publicaciones no accesible: calcular score localmente
+            nuevoScore = votoRepository.findAllByRespuestaId(respuestaId)
+                    .stream().mapToInt(Voto::getValor).sum();
+        }
 
         fakeMessageBroker.publish(evento, respuestaId);
 
-        return nuevoScore != null ? nuevoScore : 0;
+        return nuevoScore;
     }
 }
