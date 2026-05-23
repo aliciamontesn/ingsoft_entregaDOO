@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nueva pregunta — Foro Dev</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <a href="index.html">Foro Dev</a>
+  </div>
+  <div class="header-user" id="header-user"></div>
+</header>
+
+<div class="container">
+
+  <div class="breadcrumb">
+    <a href="index.html">Inicio</a>
+    <span>›</span>
+    <span>Nueva pregunta</span>
+  </div>
+
+  <div class="page-header">
+    <h1>Publicar una pregunta</h1>
+  </div>
+
+  <!-- CU3 — Publicar pregunta -->
+  <div class="form-card" style="margin-top:0">
+    <form id="form-pregunta">
+
+      <div class="form-group">
+        <label for="titulo">Título</label>
+        <input type="text" id="titulo" placeholder="¿Qué quieres preguntar? Sé específico." required maxlength="200">
+        <div class="form-hint">Resume el problema en una frase clara.</div>
+      </div>
+
+      <div class="form-group">
+        <label for="contenido">Descripción</label>
+        <textarea id="contenido" placeholder="Explica el problema con detalle: qué intentas hacer, qué has probado y qué resultado obtienes." required style="min-height:160px"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Etiquetas</label>
+        <div class="tags-grid" id="etiquetas"></div>
+        <div class="form-hint">Selecciona las tecnologías relacionadas con tu pregunta.</div>
+      </div>
+
+      <button type="submit" id="btn-publicar" class="btn btn-primary">Publicar pregunta</button>
+      <a href="index.html" class="btn btn-outline" style="margin-left:8px">Cancelar</a>
+
+    </form>
+  </div>
+
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/nueva-pregunta.js"></script>
+</body>
+</html>

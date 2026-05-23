@@ -10,7 +10,7 @@ public class Pregunta extends Publicacion {
     private String contenido;
     private Long acceptedAnswerId;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private List<Long> etiquetaIds;
 
     public String getTitulo() { return titulo; }

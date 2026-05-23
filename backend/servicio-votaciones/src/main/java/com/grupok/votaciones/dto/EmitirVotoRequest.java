@@ -1,3 +1,9 @@
 package com.grupok.votaciones.dto;
 
-public record EmitirVotoRequest(Long usuarioId, Long respuestaId, int valor) {}
+import jakarta.validation.constraints.NotNull;
+
+public record EmitirVotoRequest(
+        @NotNull Long usuarioId,
+        @NotNull Long respuestaId,
+        int valor
+) {}

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pregunta — Foro Dev</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <a href="index.html">Foro Dev</a>
+  </div>
+  <div class="header-user" id="header-user"></div>
+</header>
+
+<div class="container" id="main">
+
+  <div class="breadcrumb">
+    <a href="index.html">Inicio</a>
+    <span>›</span>
+    <span id="breadcrumb-titulo">…</span>
+  </div>
+
+  <!-- Pregunta -->
+  <div class="detail-card">
+    <h1 class="detail-title" id="pregunta-titulo">…</h1>
+
+    <div class="post-layout">
+      <!-- sin votos en la pregunta según modelo de dominio: votos sólo sobre respuestas -->
+      <div class="post-body">
+        <div class="post-content" id="pregunta-contenido"></div>
+        <div style="margin-top:12px" id="pregunta-tags"></div>
+        <div class="post-footer" id="pregunta-footer"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Respuestas -->
+  <div class="answers-header">
+    <span id="num-respuestas">0 respuestas</span>
+  </div>
+
+  <div id="respuestas"></div>
+
+  <!-- Añadir respuesta -->
+  <div class="form-card">
+    <h3>Tu respuesta</h3>
+    <form id="form-respuesta">
+      <div class="form-group">
+        <textarea id="nueva-respuesta" placeholder="Escribe tu respuesta aquí…" required></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">Publicar respuesta</button>
+    </form>
+  </div>
+
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/pregunta.js"></script>
+</body>
+</html>

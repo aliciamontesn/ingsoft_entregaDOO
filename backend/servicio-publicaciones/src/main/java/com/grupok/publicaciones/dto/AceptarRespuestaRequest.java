@@ -1,3 +1,5 @@
 package com.grupok.publicaciones.dto;
 
-public record AceptarRespuestaRequest(Long usuarioId) {}
+import jakarta.validation.constraints.NotNull;
+
+public record AceptarRespuestaRequest(@NotNull Long usuarioId) {}

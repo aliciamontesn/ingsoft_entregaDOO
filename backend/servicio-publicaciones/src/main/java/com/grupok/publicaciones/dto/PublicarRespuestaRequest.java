@@ -3,7 +3,8 @@ package com.grupok.publicaciones.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-public record ReportarPublicacionRequest(
+public record PublicarRespuestaRequest(
         @NotNull Long usuarioId,
-        @NotBlank String motivo
+        @NotNull Long preguntaId,
+        @NotBlank String contenido
 ) {}

@@ -1,15 +1,19 @@
 package com.grupok.publicaciones.service;
 
+import com.grupok.publicaciones.model.EstadoPublicacion;
 import com.grupok.publicaciones.model.Reporte;
 import com.grupok.publicaciones.repository.PublicacionRepository;
 import com.grupok.publicaciones.repository.ReporteRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 // CU2 — seq_cu2: :ReporteController → :ReporteService
 @Service
 public class ReporteService {
+
+    private static final int LIMITE_REPORTES = 3;
 
     private final PublicacionRepository publicacionRepository;
     private final ReporteRepository reporteRepository;
@@ -21,8 +25,9 @@ public class ReporteService {
     }
 
     // CU2: reportarPublicacion(usuarioId, publicacionId, motivo)
+    @Transactional
     public Reporte reportarPublicacion(Long usuarioId, Long publicacionId, String motivo) {
-        publicacionRepository.findById(publicacionId)
+        var publicacion = publicacionRepository.findById(publicacionId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Publicación no encontrada: " + publicacionId));
 
         Reporte reporte = new Reporte();
@@ -31,8 +36,15 @@ public class ReporteService {
         reporte.setMotivo(motivo);
         reporteRepository.save(reporte);
 
+        // CU2 extensión 6a: auto-ocultar si se supera el límite de reportes
         long numReportes = reporteRepository.countByPublicacionId(publicacionId);
-        // Si se supera el límite de reportes, aquí se gestionaría la moderación
+        EstadoPublicacion estadoActual = publicacion.getEstado();
+        if (numReportes >= LIMITE_REPORTES
+                && (estadoActual == null || estadoActual == EstadoPublicacion.VISIBLE)) {
+            publicacion.setEstado(EstadoPublicacion.OCULTA);
+            publicacionRepository.save(publicacion);
+        }
+
         return reporte;
     }
 }

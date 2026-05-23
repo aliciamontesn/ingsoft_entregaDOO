@@ -4,6 +4,7 @@ import com.grupok.publicaciones.model.Publicacion;
 import com.grupok.publicaciones.repository.PublicacionRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 // CU1 (llamada desde servicio-votaciones): PATCH /publicaciones/{id}/score
@@ -16,6 +17,7 @@ public class PublicacionService {
         this.publicacionRepository = publicacionRepository;
     }
 
+    @Transactional
     public int actualizarScore(Long publicacionId, int delta) {
         Publicacion publicacion = publicacionRepository.findById(publicacionId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Publicación no encontrada: " + publicacionId));

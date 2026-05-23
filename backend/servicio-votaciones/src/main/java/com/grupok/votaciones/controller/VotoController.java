@@ -2,6 +2,7 @@ package com.grupok.votaciones.controller;
 
 import com.grupok.votaciones.dto.EmitirVotoRequest;
 import com.grupok.votaciones.service.VotoService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +20,7 @@ public class VotoController {
 
     // CU1: POST /votos {usuarioId, respuestaId, valor}
     @PostMapping("/votos")
-    public ResponseEntity<Map<String, Object>> emitirVoto(@RequestBody EmitirVotoRequest request) {
+    public ResponseEntity<Map<String, Object>> emitirVoto(@Valid @RequestBody EmitirVotoRequest request) {
         int nuevoScore = votoService.emitirVoto(request.usuarioId(), request.respuestaId(), request.valor());
         return ResponseEntity.ok(Map.of("nuevoScore", nuevoScore));
     }
