@@ -64,8 +64,7 @@ public class PreguntaService {
     }
 
     private PreguntaResumenDto toResumen(Pregunta p) {
-        long numRespuestas = respuestaRepository
-                .countByPreguntaIdAndEstadoNot(p.getId(), EstadoPublicacion.ELIMINADA);
+        long numRespuestas = respuestaRepository.countVisibleByPreguntaId(p.getId());
         return new PreguntaResumenDto(
                 p.getId(), p.getAutorId(), p.getScore(), p.getTitulo(), p.getContenido(),
                 p.getEtiquetaIds(), p.getAcceptedAnswerId(), p.getFechaCreacion(), p.getEstado(),

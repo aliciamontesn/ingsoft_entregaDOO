@@ -35,6 +35,14 @@ public class ReporteService {
         var publicacion = publicacionRepository.findById(publicacionId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Publicación no encontrada: " + publicacionId));
 
+        // CU2 precondición: la publicación debe estar visible (no eliminada ni oculta)
+        if (publicacion.getEstado() == EstadoPublicacion.ELIMINADA) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Publicación no encontrada: " + publicacionId);
+        }
+        if (publicacion.getEstado() == EstadoPublicacion.OCULTA) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Publicación no encontrada: " + publicacionId);
+        }
+
         if (usuarioId.equals(publicacion.getAutorId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No puedes reportar tu propia publicación");
         }
