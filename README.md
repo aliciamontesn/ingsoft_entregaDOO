@@ -11,17 +11,18 @@ Foro tecnico para desarrolladores con arquitectura de microservicios en Spring B
 ## Indice
 
 1. [La aplicacion](#la-aplicacion)
-2. [Stack tecnico](#stack-tecnico)
-3. [Como usar la web](#como-usar-la-web)
-4. [Arquitectura del sistema](#arquitectura-del-sistema)
-5. [Microservicios y fakes](#microservicios-y-fakes)
-6. [Casos de uso implementados](#casos-de-uso-implementados)
-7. [Estructura del proyecto](#estructura-del-proyecto)
-8. [Modelo de datos](#modelo-de-datos)
-9. [API - Referencia de endpoints](#api---referencia-de-endpoints)
-10. [Despliegue](#despliegue)
-11. [Ejecucion en local](#ejecucion-en-local)
-12. [Trazabilidad diagrama - codigo](#trazabilidad-diagrama---codigo)
+2. [Datos de ejemplo cargados](#datos-de-ejemplo-cargados)
+3. [Stack tecnico](#stack-tecnico)
+4. [Como usar la web](#como-usar-la-web)
+5. [Arquitectura del sistema](#arquitectura-del-sistema)
+6. [Microservicios y fakes](#microservicios-y-fakes)
+7. [Casos de uso implementados](#casos-de-uso-implementados)
+8. [Estructura del proyecto](#estructura-del-proyecto)
+9. [Modelo de datos](#modelo-de-datos)
+10. [API - Referencia de endpoints](#api---referencia-de-endpoints)
+11. [Despliegue](#despliegue)
+12. [Ejecucion en local](#ejecucion-en-local)
+13. [Trazabilidad diagrama - codigo](#trazabilidad-diagrama---codigo)
 
 ---
 
@@ -34,6 +35,33 @@ La aplicacion esta disponible en produccion en la siguiente URL:
 Es un foro de preguntas y respuestas orientado a desarrolladores software, al estilo de Stack Overflow pero simplificado para cubrir los cuatro casos de uso del proyecto. Los usuarios pueden publicar preguntas tecnicas, responderlas, votar las respuestas de otros, reportar contenido inapropiado y marcar una respuesta como la solucion definitiva a su pregunta.
 
 No hay registro de usuarios como tal: el sistema usa un identificador numerico simple almacenado en el navegador. Para empezar a usar la aplicacion basta con introducir cualquier numero entero positivo como ID. Esto es un sistema de autenticacion fake, suficiente para el alcance del proyecto, que permite probar todos los casos de uso con distintos usuarios simplemente cambiando de ID.
+
+---
+
+## Datos de ejemplo cargados
+
+La aplicacion tiene datos de ejemplo cargados en produccion para que se pueda ver el funcionamiento real sin necesidad de crear contenido desde cero.
+
+Las preguntas y respuestas estan inspiradas en dudas tecnicas reales extraidas de Stack Overflow, el foro de referencia para desarrolladores. Se han adaptado ligeramente para que encajen con las etiquetas y el contexto del proyecto, pero el contenido tecnico es representativo de lo que se encuentra habitualmente en ese tipo de comunidades.
+
+### Escenario de ejemplo
+
+Se han creado cuatro usuarios (IDs 1, 2, 3 y 4) que interactuan entre si cubriendo todos los casos de uso:
+
+**Pregunta 1 - usuario 1** (Java, Spring Boot): duda sobre NullPointerException al inyectar un @Service dentro de una clase @Configuration.
+- Usuario 2 responde con la solucion correcta (inyeccion por parametro en el metodo @Bean).
+- Usuario 3 responde con una alternativa usando @Lazy.
+- Usuarios 3 y 4 votan positivo la respuesta de usuario 2.
+- Usuario 1 vota negativo la respuesta de usuario 3.
+- Usuario 1 acepta la respuesta de usuario 2 como solucion definitiva.
+
+**Pregunta 2 - usuario 1** (SQL, PostgreSQL): duda sobre un LEFT JOIN lento en una tabla con millones de registros y el planificador de consultas ignorando los indices.
+- Usuario 2 responde explicando como actualizar estadisticas con ANALYZE y ajustar random_page_cost.
+- Usuario 4 vota positivo la respuesta de usuario 2.
+
+### Sistema de reportes
+
+Cualquier usuario puede reportar una publicacion que considere inapropiada o de baja calidad. Cuando una publicacion acumula 3 reportes de usuarios distintos, el sistema la oculta automaticamente: deja de aparecer en el listado y en el detalle de la pregunta, y se publica un evento interno que notifica a los administradores. Un usuario no puede reportar la misma publicacion dos veces ni reportar sus propias publicaciones.
 
 ---
 
