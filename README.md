@@ -14,15 +14,11 @@ Foro tecnico para desarrolladores con arquitectura de microservicios en Spring B
 2. [Datos de ejemplo cargados](#datos-de-ejemplo-cargados)
 3. [Stack tecnico](#stack-tecnico)
 4. [Como usar la web](#como-usar-la-web)
-5. [Arquitectura del sistema](#arquitectura-del-sistema)
-6. [Microservicios y fakes](#microservicios-y-fakes)
-7. [Casos de uso implementados](#casos-de-uso-implementados)
-8. [Estructura del proyecto](#estructura-del-proyecto)
-9. [Modelo de datos](#modelo-de-datos)
-10. [API](#api)
-11. [Despliegue](#despliegue)
-12. [Ejecucion en local](#ejecucion-en-local)
-13. [Trazabilidad diagrama - codigo](#trazabilidad-diagrama---codigo)
+5. [Casos de uso implementados](#casos-de-uso-implementados)
+6. [Trazabilidad diagrama - codigo](#trazabilidad-diagrama---codigo)
+7. [Estructura del proyecto](#estructura-del-proyecto)
+8. [Despliegue](#despliegue)
+9. [Ejecucion en local](#ejecucion-en-local)
 
 ---
 
@@ -108,7 +104,6 @@ Debajo aparecen todas las respuestas publicadas. Cada respuesta tiene:
 - Si el usuario logueado es el autor de la pregunta y aun no hay respuesta aceptada: el boton "Aceptar"
 - Si hay una respuesta aceptada y el usuario es el autor de la pregunta: el boton "Quitar aceptada"
 - Si el usuario logueado es el autor de la respuesta o el autor de la pregunta: el boton "Eliminar"
-- El ID del autor de la respuesta
 
 Al final de la pagina hay un formulario de texto para publicar una nueva respuesta.
 
@@ -122,47 +117,6 @@ Para probar el sistema con distintos usuarios basta con pulsar "Salir" en el enc
 
 ---
 
-## Arquitectura del sistema
-
-El sistema sigue una arquitectura de microservicios con los patrones CQRS y Event-Driven Architecture, tal como establece la especificacion del proyecto. Se implementan completamente dos microservicios; el resto de servicios del ecosistema (busqueda, notificaciones, reputacion, etc.) se simulan mediante clases fake.
-
-```
-+----------------------------------------------+
-|  Frontend estatico (Netlify)                 |
-|  HTML + CSS + JavaScript vanilla             |
-+---------------+--------------+---------------+
-                |              |
-           HTTP REST      HTTP REST
-                |              |
-                v              v
-  +--------------------+  +--------------------+
-  |  servicio-         |  |  servicio-         |
-  |  publicaciones     |  |  votaciones        |
-  |  Spring Boot :8081 |  |  Spring Boot :8082 |
-  |  PostgreSQL propio |  |  PostgreSQL propio |
-  +--------------------+  +--------------------+
-         |    ^                    |
-         |    | PATCH /score       |
-         |    +--------------------+
-         |
-         v
-  [FakeMessageBroker]
-  Simula el Message Broker (Kafka en el sistema real)
-  invocando a los consumidores de forma sincrona
-```
-
-El frontend se comunica directamente con los dos microservicios sin API Gateway (no implementado en esta entrega). Las URLs de cada servicio se configuran en `frontend/js/config.js`.
-
-La unica comunicacion real entre microservicios ocurre en CU1 (votacion): cuando se registra un voto, `servicio-votaciones` hace un `PATCH /publicaciones/{id}/score` a `servicio-publicaciones` para actualizar el score almacenado. Si esa llamada falla (por ejemplo, porque `PUBLICACIONES_URL` no esta configurada), el sistema no cae: los votos se siguen guardando correctamente y el score se calcula en tiempo real sumando los votos de la base de datos de votaciones.
-
----
-
-## Microservicios y fakes
-
-El proyecto tiene dos microservicios reales (`servicio-publicaciones` en el puerto 8081 y `servicio-votaciones` en el 8082), cada uno con su propia base de datos PostgreSQL. El resto de servicios que existirian en el sistema completo (busqueda, notificaciones, reputacion de usuarios, un message broker tipo Kafka...) estan simulados con clases Java simples anotadas con `@Component`. Estas clases tienen la misma interfaz que tendrian los servicios reales pero en lugar de hacer llamadas de red simplemente imprimen una traza por consola. Spring los inyecta igual que cualquier otro bean, por lo que cambiarlos por implementaciones reales en el futuro no requeriria tocar el codigo de negocio.
-
----
-
 ## Casos de uso implementados
 
 **CU1 - Votar una respuesta:** cualquier usuario puede dar +1 o -1 a la respuesta de otro. Si ya habia votado igual, se retira el voto. Si habia votado al contrario, se sustituye. No se puede votar la propia respuesta. Los scores se calculan siempre desde la base de datos de votaciones, que es la fuente de verdad.
@@ -172,6 +126,14 @@ El proyecto tiene dos microservicios reales (`servicio-publicaciones` en el puer
 **CU3 - Publicar una pregunta:** formulario con titulo, contenido y etiquetas. Tras publicar redirige al detalle de la pregunta recien creada. Etiquetas disponibles: Java, Spring Boot, SQL, JPA, REST, Docker, Testing, Frontend.
 
 **CU4 - Aceptar una respuesta:** el autor de la pregunta puede marcar una respuesta como solucion definitiva. Puede cambiarlo despues pulsando "Quitar aceptada" y aceptando otra diferente.
+
+---
+
+## Trazabilidad diagrama - codigo
+
+Los nombres de clases, metodos y rutas en el codigo son exactamente los mismos que los que aparecen en los diagramas de secuencia entregados. Si en el diagrama aparece el participante `:VotoService`, en el codigo existe la clase `VotoService.java` con ese mismo nombre. Si el diagrama muestra el mensaje `reportarPublicacion()`, ese es el nombre exacto del metodo en `ReporteService.java`. El objetivo es que seguir un caso de uso entre el diagrama y el codigo no requiera ninguna traduccion: se puede ir directamente de un participante del diagrama al fichero correspondiente.
+
+Esto aplica a todos los participantes: controladores (`@RestController`), servicios (`@Service`), repositorios (`@Repository`) y los servicios externos simulados (`@Component`), que en los diagramas aparecen como boundaries o queues y en el codigo son las clases `FakeMessageBroker`, `FakeServicioEtiquetas`, `FakeServicioBusqueda`, etc.
 
 ---
 
@@ -195,47 +157,9 @@ ingsoft_entregaDOO/
 
 ---
 
-## Modelo de datos
-
-Pregunta y Respuesta heredan de una entidad base `Publicacion` mediante `InheritanceType.JOINED`. El estado de cada publicacion puede ser `VISIBLE`, `OCULTA` (ocultada por reportes) o `ELIMINADA` (borrado logico por el autor). Los votos viven en una tabla separada en la base de datos de votaciones.
-
----
-
-## API
-
-**servicio-publicaciones (8081)**
-
-| Metodo | Ruta | Descripcion |
-|---|---|---|
-| GET | `/preguntas` | lista de preguntas visibles |
-| POST | `/preguntas` | nueva pregunta |
-| GET | `/preguntas/{id}` | detalle con respuestas |
-| DELETE | `/preguntas/{id}?usuarioId=X` | eliminar (solo el autor) |
-| POST | `/respuestas` | nueva respuesta |
-| PATCH | `/respuestas/{id}/aceptar` | aceptar respuesta |
-| PATCH | `/respuestas/{id}/desaceptar` | quitar aceptacion |
-| DELETE | `/respuestas/{id}?usuarioId=X` | eliminar respuesta |
-| POST | `/publicaciones/{id}/reportes` | reportar |
-| PATCH | `/publicaciones/{id}/score` | actualizar score (llamado internamente por votaciones) |
-
-**servicio-votaciones (8082)**
-
-| Metodo | Ruta | Descripcion |
-|---|---|---|
-| POST | `/votos` | emitir voto (+1 o -1) |
-| GET | `/votos/scores?ids=1,2,3` | scores actuales de varias respuestas |
-
-Todos los errores devuelven `{ "error": "..." }` con el codigo HTTP correspondiente (400, 403, 404 o 409).
-
----
-
 ## Despliegue
 
-El backend esta en Railway: cada microservicio es un servicio independiente con su propio plugin de PostgreSQL. Railway detecta el `pom.xml`, compila con Maven y ejecuta el JAR. El puerto lo gestiona Railway automaticamente via la variable `PORT`.
-
-Un detalle tecnico a tener en cuenta: Railway proporciona la URL de la base de datos en formato `postgresql://user:pass@host/db`, que el driver JDBC no acepta directamente. El fichero `DataSourceConfig.java` la parsea con `java.net.URI` y construye la URL JDBC correcta para HikariCP.
-
-El frontend es un sitio estatico en Netlify. No requiere proceso de build: se sube la carpeta `frontend/` y se apunta `config.js` a las URLs de Railway. Listo.
+El backend esta en Railway con dos servicios independientes, cada uno con su propio plugin de PostgreSQL. Railway detecta el `pom.xml`, compila con Maven y ejecuta el JAR. El frontend esta en Netlify como sitio estatico: se sube la carpeta `frontend/` y se apuntan las URLs de Railway en `config.js`. Sin mas configuracion.
 
 ---
 
@@ -254,9 +178,3 @@ cd backend/servicio-votaciones && mvn spring-boot:run      # puerto 8082
 ```
 
 Hibernate crea las tablas solo al arrancar. El frontend se abre directamente en el navegador desde `frontend/index.html` (verificar que `config.js` apunta a localhost).
-
----
-
-## Trazabilidad diagrama - codigo
-
-Los nombres de clases y metodos en el codigo corresponden directamente con los participantes de los diagramas de secuencia de la especificacion: `VotoController`, `VotoService`, `VotoRepository` en votaciones; `PreguntaController`, `PreguntaService`, `ReporteController`, `ReporteService`, `RespuestaController`, `RespuestaService` en publicaciones. El `FakeMessageBroker` representa la cola de mensajes (Kafka en el sistema real) y los fakes representan cada uno de los microservicios externos.
