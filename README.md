@@ -1,6 +1,6 @@
 # Foro de Desarrolladores - Grupo K
 
-Trabajo final de Ingenieria del Software - Disenio Orientado a Objetos.
+Trabajo Ingenieria del Software - Disenio Orientado a Objetos.
 
 Foro tecnico para desarrolladores con arquitectura de microservicios en Spring Boot, base de datos PostgreSQL y frontend estatico desplegado en produccion.
 
