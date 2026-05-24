@@ -2,7 +2,7 @@ package com.grupok.votaciones.fake;
 
 import org.springframework.stereotype.Component;
 
-// Fake del Servicio de Reputación — CU1: consume VotoEmitido → actualizarReputacion
+// Simula la actualizacion de reputacion cuando se recibe un voto
 @Component
 public class FakeServicioReputacion {
 

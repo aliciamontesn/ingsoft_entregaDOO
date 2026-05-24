@@ -4,8 +4,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-// Fake del Servicio de Etiquetas — CU3: llamada síncrona desde PreguntaService
-// Simula GET /etiquetas?ids={etiquetaIds} devolviendo siempre etiquetas válidas
+// Simula la validacion de etiquetas; en produccion consultaria al servicio real
 @Component
 public class FakeServicioEtiquetas {
 

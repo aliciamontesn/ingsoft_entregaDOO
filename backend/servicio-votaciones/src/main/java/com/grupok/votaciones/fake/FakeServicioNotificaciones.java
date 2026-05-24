@@ -2,7 +2,7 @@ package com.grupok.votaciones.fake;
 
 import org.springframework.stereotype.Component;
 
-// Fake del Servicio de Notificaciones — CU1: consume VotoEmitido → notificarAutorVoto
+// Simula la notificacion al autor cuando recibe un voto
 @Component
 public class FakeServicioNotificaciones {
 

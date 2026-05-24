@@ -2,7 +2,7 @@ package com.grupok.publicaciones.fake;
 
 import org.springframework.stereotype.Component;
 
-// Fake del Proyector CQRS — CU3 y CU4: consume eventos → actualizarModeloLectura
+// Simula el proyector CQRS que actualiza el modelo de lectura
 @Component
 public class FakeProyectorCQRS {
 

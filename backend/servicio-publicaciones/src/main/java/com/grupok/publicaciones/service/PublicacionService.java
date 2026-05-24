@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-// CU1 (llamada desde servicio-votaciones): PATCH /publicaciones/{id}/score
 @Service
 public class PublicacionService {
 

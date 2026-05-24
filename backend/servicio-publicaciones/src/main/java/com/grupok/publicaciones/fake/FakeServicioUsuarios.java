@@ -2,7 +2,7 @@ package com.grupok.publicaciones.fake;
 
 import org.springframework.stereotype.Component;
 
-// Fake del Servicio de Usuarios — CU4: consume respuesta_aceptada → sumarPuntosReputacion
+// Simula la actualizacion de reputacion del usuario
 @Component
 public class FakeServicioUsuarios {
 

@@ -8,11 +8,8 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
-// CU2 — seq_cu2: ReporteService → :PublicacionRepository
-// CU4 — seq_cu4: RespuestaService → :PublicacionRepository
 public interface PublicacionRepository extends JpaRepository<Publicacion, Long> {
 
-    // CU4: buscarPreguntaPorRespuesta(respuestaId)
     @Query("SELECT r.pregunta FROM Respuesta r WHERE r.id = :respuestaId")
     Optional<Pregunta> findPreguntaByRespuestaId(@Param("respuestaId") Long respuestaId);
 }

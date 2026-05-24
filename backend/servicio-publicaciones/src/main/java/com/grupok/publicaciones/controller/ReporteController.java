@@ -7,7 +7,6 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-// CU2 — seq_cu2: API de Publicaciones → :ReporteController
 @RestController
 public class ReporteController {
 
@@ -17,7 +16,6 @@ public class ReporteController {
         this.reporteService = reporteService;
     }
 
-    // CU2: POST /publicaciones/{id}/reportes {usuarioId, motivo}
     @PostMapping("/publicaciones/{id}/reportes")
     public ResponseEntity<ReporteResultadoDto> reportarPublicacion(@PathVariable Long id,
                                                                    @Valid @RequestBody ReportarPublicacionRequest request) {

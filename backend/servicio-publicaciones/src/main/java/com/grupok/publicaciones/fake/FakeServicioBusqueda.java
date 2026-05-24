@@ -2,7 +2,7 @@ package com.grupok.publicaciones.fake;
 
 import org.springframework.stereotype.Component;
 
-// Fake del Servicio de Búsqueda — CU3: consume pregunta_publicada → indexarEnElasticsearch; CU2: consume publicacion_ocultada → eliminarDelIndice
+// Simula el servicio de busqueda (en produccion seria Elasticsearch)
 @Component
 public class FakeServicioBusqueda {
 

@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-// CU2 — seq_cu2: :ReporteController → :ReporteService
 @Service
 public class ReporteService {
 
@@ -29,13 +28,12 @@ public class ReporteService {
         this.fakeMessageBroker = fakeMessageBroker;
     }
 
-    // CU2: reportarPublicacion(usuarioId, publicacionId, motivo)
     @Transactional
     public ReporteResultadoDto reportarPublicacion(Long usuarioId, Long publicacionId, String motivo) {
         var publicacion = publicacionRepository.findById(publicacionId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Publicación no encontrada: " + publicacionId));
 
-        // CU2 precondición: la publicación debe estar visible (no eliminada ni oculta)
+        // no se puede reportar algo que ya no es visible
         if (publicacion.getEstado() == EstadoPublicacion.ELIMINADA) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Publicación no encontrada: " + publicacionId);
         }
@@ -57,7 +55,7 @@ public class ReporteService {
         reporte.setMotivo(motivo);
         reporteRepository.save(reporte);
 
-        // CU2 extensión 6a: auto-ocultar si se supera el límite de reportes
+        // si se llega al limite de reportes, ocultar automaticamente
         long numReportes = reporteRepository.countByPublicacionId(publicacionId);
         boolean oculta = false;
         EstadoPublicacion estadoActual = publicacion.getEstado();

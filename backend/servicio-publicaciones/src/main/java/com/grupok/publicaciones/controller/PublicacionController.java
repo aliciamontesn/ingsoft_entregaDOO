@@ -4,7 +4,7 @@ import com.grupok.publicaciones.service.PublicacionService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-// CU1 — seq_cu1: recibe PATCH /publicaciones/{id}/score desde servicio-votaciones
+// Este endpoint lo llama servicio-votaciones cuando registra un voto
 @RestController
 public class PublicacionController {
 
@@ -14,7 +14,6 @@ public class PublicacionController {
         this.publicacionService = publicacionService;
     }
 
-    // CU1: PATCH /publicaciones/{respuestaId}/score {delta}
     @PatchMapping("/publicaciones/{id}/score")
     public ResponseEntity<Integer> actualizarScore(@PathVariable Long id,
                                                    @RequestBody int delta) {

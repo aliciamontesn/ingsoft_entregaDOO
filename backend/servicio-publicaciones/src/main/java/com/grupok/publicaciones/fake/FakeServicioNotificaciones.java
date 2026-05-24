@@ -2,7 +2,7 @@ package com.grupok.publicaciones.fake;
 
 import org.springframework.stereotype.Component;
 
-// Fake del Servicio de Notificaciones — CU4: consume respuesta_aceptada → notificarAutorRespuesta; CU2: consume publicacion_ocultada → notificarAdministradores
+// Simula el servicio de notificaciones
 @Component
 public class FakeServicioNotificaciones {
 

@@ -14,7 +14,7 @@ public interface RespuestaRepository extends JpaRepository<Respuesta, Long> {
 
     long countByPreguntaIdAndEstadoNot(Long preguntaId, EstadoPublicacion estado);
 
-    // Cuenta solo respuestas visibles (excluye ELIMINADA y OCULTA) para el resumen de la lista de preguntas
+    // excluye las ocultas y eliminadas del conteo que aparece en la lista de preguntas
     @Query("SELECT COUNT(r) FROM Respuesta r WHERE r.preguntaId = :id AND (r.estado IS NULL OR r.estado = 'VISIBLE')")
     long countVisibleByPreguntaId(@Param("id") Long preguntaId);
 }

@@ -30,7 +30,6 @@ public class RespuestaService {
         this.fakeMessageBroker = fakeMessageBroker;
     }
 
-    // CU4: aceptarRespuesta(usuarioId, respuestaId)
     @Transactional
     public void aceptarRespuesta(Long usuarioId, Long respuestaId) {
         Pregunta pregunta = publicacionRepository.findPreguntaByRespuestaId(respuestaId)
@@ -53,7 +52,6 @@ public class RespuestaService {
         fakeMessageBroker.publish("respuesta_aceptada", respuestaId);
     }
 
-    // CU4 ext.5a.2: desaceptarRespuesta(usuarioId, respuestaId)
     @Transactional
     public void desaceptarRespuesta(Long usuarioId, Long respuestaId) {
         Pregunta pregunta = publicacionRepository.findPreguntaByRespuestaId(respuestaId)

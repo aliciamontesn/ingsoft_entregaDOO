@@ -34,7 +34,6 @@ public class VotoService {
         this.restTemplate = restTemplate;
     }
 
-    // CU1: calcularScores — suma de votos por respuesta (fuente de verdad del score)
     public Map<Long, Integer> calcularScores(List<Long> respuestaIds) {
         Map<Long, Integer> scores = respuestaIds.stream()
                 .collect(Collectors.toMap(id -> id, id -> 0));
@@ -43,14 +42,13 @@ public class VotoService {
         return scores;
     }
 
-    // CU1: emitirVoto(usuarioId, respuestaId, valor, autorRespuestaId)
     @Transactional
     public int emitirVoto(Long usuarioId, Long respuestaId, int valor, Long autorRespuestaId) {
         if (valor != 1 && valor != -1) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El valor del voto debe ser +1 o -1");
         }
 
-        // CU1 paso 3: verificarNoAutovoto — usar autorId enviado por el frontend (evita llamada inter-servicio)
+        // el frontend manda el autorId para evitar una llamada extra al otro servicio
         if (autorRespuestaId != null && usuarioId.equals(autorRespuestaId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No puedes votar tu propia respuesta");
         }
@@ -73,12 +71,12 @@ public class VotoService {
             } catch (HttpClientErrorException.NotFound e) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Respuesta no encontrada: " + respuestaId);
             } catch (Exception e) {
-                // servicio-publicaciones no accesible; no se puede verificar autovoto sin autorRespuestaId
+                // sin autorRespuestaId y sin acceso al otro servicio no podemos verificar el autovoto
                 throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "No se pudo verificar el autor de la respuesta");
             }
         }
 
-        // CU1 extensiones 4a/4b: lógica de voto previo
+        // si ya habia votado antes, retirar o cambiar segun corresponda
         Optional<Voto> votoExistente = votoRepository.findByUsuarioIdAndRespuestaId(usuarioId, respuestaId);
         int delta;
         String evento;
@@ -86,12 +84,12 @@ public class VotoService {
         if (votoExistente.isPresent()) {
             Voto voto = votoExistente.get();
             if (voto.getValor() == valor) {
-                // Extensión 4a: mismo voto → retirar
+                // mismo voto: se retira
                 votoRepository.delete(voto);
                 delta = -valor;
                 evento = "VotoRetirado";
             } else {
-                // Extensión 4b: voto contrario → sustituir
+                // voto contrario: se sustituye
                 int oldValor = voto.getValor();
                 voto.setValor(valor);
                 votoRepository.save(voto);
@@ -108,14 +106,14 @@ public class VotoService {
             evento = "VotoEmitido";
         }
 
-        // Actualizar score en servicio-publicaciones (puede no estar accesible en Railway)
+        // intentamos actualizar el score en el otro servicio; si no responde lo calculamos aqui
         int nuevoScore;
         try {
             String urlScore = publicacionesUrl + "/publicaciones/" + respuestaId + "/score";
             Integer scoreRemoto = restTemplate.patchForObject(urlScore, delta, Integer.class);
             nuevoScore = scoreRemoto != null ? scoreRemoto : 0;
         } catch (Exception e) {
-            // servicio-publicaciones no accesible: calcular score localmente
+            // si el otro servicio no responde, sumamos los votos directamente
             nuevoScore = votoRepository.findAllByRespuestaId(respuestaId)
                     .stream().mapToInt(Voto::getValor).sum();
         }
