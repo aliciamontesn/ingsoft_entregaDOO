@@ -1,105 +1,169 @@
 # Foro de Desarrolladores - Grupo K
 
-Sistema de foro técnico para desarrolladores, implementado como una aplicación web completa con arquitectura de microservicios en el backend y un frontend estático desplegado en producción.
+Trabajo final de Ingenieria del Software - Disenio Orientado a Objetos.
 
-Asignatura: Ingeniería del Software - Diseño Orientado a Objetos.
+Foro tecnico para desarrolladores con arquitectura de microservicios en Spring Boot, base de datos PostgreSQL y frontend estatico desplegado en produccion.
+
+**Aplicacion en produccion:** https://foro-developers-soft.netlify.app/login.html
+
+---
 
 ## Indice
 
-1. [Descripcion general](#descripcion-general)
-2. [Arquitectura](#arquitectura)
-3. [Microservicios reales y fakes](#microservicios-reales-y-fakes)
-4. [Casos de uso implementados](#casos-de-uso-implementados)
-5. [Estructura del codigo](#estructura-del-codigo)
-6. [Modelo de datos](#modelo-de-datos)
-7. [API - Endpoints](#api---endpoints)
-8. [Frontend](#frontend)
-9. [Despliegue en produccion](#despliegue-en-produccion)
-10. [Ejecucion en local](#ejecucion-en-local)
-11. [Continuidad diagrama a codigo](#continuidad-diagrama-a-codigo)
+1. [La aplicacion](#la-aplicacion)
+2. [Stack tecnico](#stack-tecnico)
+3. [Como usar la web](#como-usar-la-web)
+4. [Arquitectura del sistema](#arquitectura-del-sistema)
+5. [Microservicios y fakes](#microservicios-y-fakes)
+6. [Casos de uso implementados](#casos-de-uso-implementados)
+7. [Estructura del proyecto](#estructura-del-proyecto)
+8. [Modelo de datos](#modelo-de-datos)
+9. [API - Referencia de endpoints](#api---referencia-de-endpoints)
+10. [Despliegue](#despliegue)
+11. [Ejecucion en local](#ejecucion-en-local)
+12. [Trazabilidad diagrama - codigo](#trazabilidad-diagrama---codigo)
 
 ---
 
-## Descripcion general
+## La aplicacion
 
-El sistema permite a usuarios registrados publicar preguntas tecnicas, responderlas, votar respuestas, reportar contenido inapropiado y marcar respuestas como aceptadas. Cubre los cuatro casos de uso definidos en la especificacion del proyecto:
+La aplicacion esta disponible en produccion en la siguiente URL:
 
-- **CU1**: Emitir voto sobre una respuesta
-- **CU2**: Reportar publicacion para moderacion
-- **CU3**: Publicar una pregunta
-- **CU4**: Marcar respuesta como aceptada
+**https://foro-developers-soft.netlify.app/login.html**
+
+Es un foro de preguntas y respuestas orientado a desarrolladores software, al estilo de Stack Overflow pero simplificado para cubrir los cuatro casos de uso del proyecto. Los usuarios pueden publicar preguntas tecnicas, responderlas, votar las respuestas de otros, reportar contenido inapropiado y marcar una respuesta como la solucion definitiva a su pregunta.
+
+No hay registro de usuarios como tal: el sistema usa un identificador numerico simple almacenado en el navegador. Para empezar a usar la aplicacion basta con introducir cualquier numero entero positivo como ID. Esto es un sistema de autenticacion fake, suficiente para el alcance del proyecto, que permite probar todos los casos de uso con distintos usuarios simplemente cambiando de ID.
 
 ---
 
-## Arquitectura
+## Stack tecnico
 
-El sistema sigue una arquitectura de **microservicios** con patrones **CQRS** y **Event-Driven Architecture**. Se implementan completamente dos microservicios backend; el resto de servicios del sistema se simulan mediante *fakes* (ver seccion correspondiente).
+**Backend:**
+- Java 21
+- Spring Boot 3.2.5
+- Spring Data JPA con Hibernate
+- PostgreSQL 15 como base de datos
+- HikariCP como pool de conexiones
+- Maven como gestor de dependencias
+
+**Frontend:**
+- HTML5, CSS3 y JavaScript vanilla (sin frameworks)
+- Sin proceso de build, archivos estaticos directamente desplegables
+
+**Infraestructura:**
+- Railway para el backend (dos servicios independientes, cada uno con su propia base de datos PostgreSQL)
+- Netlify para el frontend (sitio estatico)
+
+El backend esta implementado como dos microservicios Spring Boot independientes que se comunican entre si por HTTP. Cada microservicio tiene su propia base de datos PostgreSQL en Railway y expone su propia API REST.
+
+---
+
+## Como usar la web
+
+Al entrar a https://foro-developers-soft.netlify.app/login.html aparece una pantalla de login minimalista con un campo para introducir el ID de usuario. Basta con escribir cualquier numero (por ejemplo, 1, 2, 3...) y pulsar entrar.
+
+### Pagina principal
+
+Tras identificarse, la pagina principal muestra el listado de todas las preguntas publicadas. Cada pregunta aparece como una tarjeta con el titulo, un extracto del contenido, las etiquetas tecnicas asociadas (Java, Spring Boot, SQL, etc.), el numero de respuestas y el usuario y fecha de publicacion. Si la pregunta ya tiene una respuesta aceptada aparece un distintivo verde con una marca de verificacion.
+
+Desde aqui se puede pulsar en cualquier pregunta para ver su detalle, o usar el boton "+ Nueva pregunta" en la esquina superior derecha para publicar una pregunta propia.
+
+### Detalle de una pregunta
+
+En la pagina de detalle se muestra el contenido completo de la pregunta, sus etiquetas y un pie con el boton de reportar y, si el usuario logueado es el autor, el boton de eliminar.
+
+Debajo aparecen todas las respuestas publicadas. Cada respuesta tiene:
+- Botones de voto positivo (triangulo arriba) y negativo (triangulo abajo) con el score actual en medio
+- El contenido de la respuesta
+- El boton de reportar
+- Si el usuario logueado es el autor de la pregunta y aun no hay respuesta aceptada: el boton "Aceptar"
+- Si hay una respuesta aceptada y el usuario es el autor de la pregunta: el boton "Quitar aceptada"
+- Si el usuario logueado es el autor de la respuesta o el autor de la pregunta: el boton "Eliminar"
+- El ID del autor de la respuesta
+
+Al final de la pagina hay un formulario de texto para publicar una nueva respuesta.
+
+### Nueva pregunta
+
+El formulario de nueva pregunta tiene tres campos: titulo (obligatorio), cuerpo de la pregunta (obligatorio) y un selector de etiquetas con las ocho categorias disponibles. Tras publicar, la pagina redirige automaticamente al detalle de la pregunta recien creada.
+
+### Navegar entre usuarios
+
+Para probar el sistema con distintos usuarios basta con pulsar "Salir" en el encabezado y volver a entrar con un ID diferente. Esto permite, por ejemplo, publicar una pregunta con el usuario 1, responderla con el usuario 2, y votar la respuesta o reportarla con el usuario 3.
+
+---
+
+## Arquitectura del sistema
+
+El sistema sigue una arquitectura de microservicios con los patrones CQRS y Event-Driven Architecture, tal como establece la especificacion del proyecto. Se implementan completamente dos microservicios; el resto de servicios del ecosistema (busqueda, notificaciones, reputacion, etc.) se simulan mediante clases fake.
 
 ```
-+-----------------------------------------------------+
-|  Frontend (HTML/CSS/JS estatico - Netlify)          |
-+------------------+----------------------------------+
-                   |  HTTP / REST
-       +-----------+-----------+
-       |                       |
-       v                       v
-+-------------+       +------------------+
-| servicio-   |       |   servicio-      |
-| votaciones  +------>+  publicaciones   |
-|   :8082     | PATCH |     :8081        |
-+-------------+ score +------------------+
-       |                       |
-       +----------+------------+
-                  | publish(evento)
-                  v
-         [FakeMessageBroker]
-          (llamadas sincronas
-           simulando async)
++----------------------------------------------+
+|  Frontend estatico (Netlify)                 |
+|  HTML + CSS + JavaScript vanilla             |
++---------------+--------------+---------------+
+                |              |
+           HTTP REST      HTTP REST
+                |              |
+                v              v
+  +--------------------+  +--------------------+
+  |  servicio-         |  |  servicio-         |
+  |  publicaciones     |  |  votaciones        |
+  |  Spring Boot :8081 |  |  Spring Boot :8082 |
+  |  PostgreSQL propio |  |  PostgreSQL propio |
+  +--------------------+  +--------------------+
+         |    ^                    |
+         |    | PATCH /score       |
+         |    +--------------------+
+         |
+         v
+  [FakeMessageBroker]
+  Simula el Message Broker (Kafka en el sistema real)
+  invocando a los consumidores de forma sincrona
 ```
 
-La comunicacion entre el frontend y los backends se realiza directamente via HTTP. No hay API Gateway implementado en esta entrega; los dos servicios exponen sus puertos directamente y el frontend tiene configuradas sus URLs en `config.js`.
+El frontend se comunica directamente con los dos microservicios sin API Gateway (no implementado en esta entrega). Las URLs de cada servicio se configuran en `frontend/js/config.js`.
+
+La unica comunicacion real entre microservicios ocurre en CU1 (votacion): cuando se registra un voto, `servicio-votaciones` hace un `PATCH /publicaciones/{id}/score` a `servicio-publicaciones` para actualizar el score almacenado. Si esa llamada falla (por ejemplo, porque `PUBLICACIONES_URL` no esta configurada), el sistema no cae: los votos se siguen guardando correctamente y el score se calcula en tiempo real sumando los votos de la base de datos de votaciones.
 
 ---
 
-## Microservicios reales y fakes
+## Microservicios y fakes
 
-| Microservicio | Estado | Puerto |
+### Servicios implementados
+
+| Microservicio | Tecnologia | Puerto local |
 |---|---|---|
-| **servicio-publicaciones** | Real (Spring Boot 3.2.5) | 8081 |
-| **servicio-votaciones** | Real (Spring Boot 3.2.5) | 8082 |
-| Servicio de Etiquetas | Fake | - |
-| Servicio de Usuarios y Reputacion | Fake | - |
-| Servicio de Reputacion (votaciones) | Fake | - |
-| Servicio de Notificaciones | Fake | - |
-| Servicio de Busqueda | Fake | - |
-| Message Broker | Fake | - |
-| Proyector CQRS | Fake | - |
-| API Gateway | No implementado | - |
+| servicio-publicaciones | Spring Boot 3.2.5 + PostgreSQL | 8081 |
+| servicio-votaciones | Spring Boot 3.2.5 + PostgreSQL | 8082 |
 
-### Como funcionan los fakes
+### Servicios simulados con fakes
 
-Cada microservicio no implementado se reemplaza por una clase Java anotada con `@Component` dentro del proyecto Spring Boot que lo necesita. Estas clases tienen los mismos metodos que tendria el cliente HTTP real, pero en lugar de hacer llamadas de red imprimen trazas en consola y devuelven respuestas fijas.
+El sistema real requeriria varios microservicios adicionales (busqueda en Elasticsearch, notificaciones, reputacion de usuarios, etc.) y un Message Broker como Kafka. Para el alcance de este proyecto esos servicios se simulan con clases Java sencillas anotadas con `@Component` que tienen los mismos metodos que tendria el cliente real, pero en lugar de hacer llamadas de red imprimen una traza por consola.
 
-Spring los inyecta exactamente igual que cualquier bean real, de modo que el codigo de produccion (`PreguntaService`, `VotoService`, etc.) no sabe si esta hablando con un servicio real o con un fake.
+Spring los inyecta exactamente igual que cualquier bean real, asi que el codigo de produccion no sabe si esta hablando con un servicio real o con un fake. Esto permite cambiar cualquier fake por una implementacion real en el futuro sin tocar el codigo que lo usa.
 
 ```java
-// Ejemplo: FakeServicioEtiquetas en servicio-publicaciones
+// Ejemplo de fake: mismo contrato que el servicio real, cero dependencias de red
 @Component
-public class FakeServicioEtiquetas {
-    public List<Long> validarEtiquetas(List<Long> etiquetaIds) {
-        System.out.printf("[FakeServicioEtiquetas] validarEtiquetas: %s%n", etiquetaIds);
-        return etiquetaIds;
+public class FakeServicioBusqueda {
+    public void indexarEnElasticsearch(Long preguntaId) {
+        System.out.printf("[FakeServicioBusqueda] indexar id=%d%n", preguntaId);
+    }
+    public void eliminarDelIndice(Long publicacionId) {
+        System.out.printf("[FakeServicioBusqueda] eliminar id=%d%n", publicacionId);
     }
 }
 ```
 
 ### El FakeMessageBroker
 
-En el sistema real, los servicios publicarian eventos en Kafka y los consumidores los recibirian de forma asincrona. El `FakeMessageBroker` simula esto con llamadas sincronas directas: cuando se llama a `publish(evento, id)`, el broker fake invoca inmediatamente a los consumidores fake correspondientes.
+En el sistema real los servicios publicarian eventos en Kafka y los consumidores los recibirian de forma asincrona. El `FakeMessageBroker` reproduce ese comportamiento de forma sincrona: cuando alguien llama a `publish(evento, id)`, el broker invoca inmediatamente a los consumidores que le corresponden segun el evento.
 
-Hay un `FakeMessageBroker` en cada microservicio real, con sus propios consumidores segun el diagrama de secuencia de cada caso de uso:
+Hay un `FakeMessageBroker` en cada microservicio, con sus propios consumidores:
 
-| Evento | FakeMessageBroker en | Consumidores fake invocados |
+| Evento | Broker en | Consumidores invocados |
 |---|---|---|
 | `pregunta_publicada` | servicio-publicaciones | FakeProyectorCQRS, FakeServicioBusqueda |
 | `respuesta_aceptada` | servicio-publicaciones | FakeServicioUsuarios, FakeProyectorCQRS, FakeServicioNotificaciones |
@@ -114,131 +178,54 @@ Hay un `FakeMessageBroker` en cada microservicio real, con sus propios consumido
 
 ### CU1 - Emitir voto sobre una respuesta
 
-Un usuario registrado emite un voto positivo (+1) o negativo (-1) sobre una respuesta publicada en el foro.
+Flujo normal: el usuario pulsa el triangulo de subir o bajar sobre una respuesta. El frontend envia `POST /votos` con `usuarioId`, `respuestaId`, `valor` (+1 o -1) y `autorRespuestaId` (el ID del autor de esa respuesta, que el frontend ya conoce porque lo renderiza). El servicio comprueba que el usuario no sea el autor, consulta si ya habia votado antes y actua en consecuencia:
 
-**Flujo principal:**
+- Si no habia votado: registra el voto y publica `VotoEmitido`
+- Si habia votado igual: retira el voto y publica `VotoRetirado`
+- Si habia votado al contrario: sustituye el voto en operacion atomica y publica `VotoCambiado`
 
-1. El usuario pulsa el boton de voto positivo o negativo sobre una respuesta.
-2. El frontend envia `POST /votos` al servicio-votaciones con `usuarioId`, `respuestaId`, `valor` y `autorRespuestaId`.
-3. El servicio verifica que el usuario no sea el autor de la respuesta (comprobacion local con `autorRespuestaId`).
-4. Se consulta si el usuario ya tenia un voto previo sobre esa respuesta.
-5. Se registra el voto y se actualiza el score en servicio-publicaciones via `PATCH /publicaciones/{id}/score`.
-6. Se publica el evento `VotoEmitido` en el FakeMessageBroker.
-7. FakeServicioReputacion actualiza la reputacion del autor de la respuesta.
-8. FakeServicioNotificaciones notifica al autor del voto recibido.
-9. El servicio devuelve el nuevo score, que el frontend muestra inmediatamente.
+Despues intenta actualizar el score en servicio-publicaciones via PATCH. Si ese servicio no esta disponible, calcula el score sumando los votos en su propia base de datos y lo devuelve igual. El frontend actualiza el numero en pantalla sin recargar la pagina.
 
-**Flujos alternativos:**
+Al cargar el detalle de cualquier pregunta, los scores se obtienen siempre de `GET /votos/scores?ids=...` (servicio-votaciones), que es la fuente de verdad real.
 
-- **Autovoto (3b):** el servicio devuelve 403. La comprobacion se realiza con el campo `autorRespuestaId` enviado por el frontend, lo que evita dependencia de una llamada inter-servicio que podria fallar en produccion.
-- **Mismo voto ya registrado (4a):** se elimina el voto existente (retraccion), se publica `VotoRetirado` y el score se ajusta.
-- **Voto contrario ya registrado (4b):** se sustituye el voto en operacion atomica, se publica `VotoCambiado` y el score refleja el cambio completo (+2 o -2).
-
-**Score como fuente de verdad:**
-
-El score de cada respuesta se calcula siempre a partir de los votos almacenados en la base de datos de servicio-votaciones, a traves del endpoint `GET /votos/scores?ids=...`. Esto garantiza que el valor mostrado sea correcto incluso si el PATCH a servicio-publicaciones no esta disponible (por ejemplo, cuando `PUBLICACIONES_URL` no esta configurada).
-
----
+Validaciones:
+- Autovoto: 403. La comprobacion usa `autorRespuestaId` del body para no depender de una llamada inter-servicio
+- Valor distinto de +1 o -1: 400
 
 ### CU2 - Reportar publicacion para moderacion
 
-Un usuario registrado reporta una pregunta o respuesta por contenido inapropiado.
+Flujo normal: el usuario pulsa "Reportar" en una pregunta o respuesta, introduce el motivo y confirma. El backend verifica que la publicacion existe y esta en estado VISIBLE, que el usuario no es su autor y que no ha reportado ya esa publicacion. Registra el reporte y cuenta el total acumulado.
 
-**Flujo principal:**
+Si el total no alcanza el limite (3 reportes), el sistema confirma la accion y el frontend muestra un aviso indicando cuantos reportes quedan para el umbral.
 
-1. El usuario pulsa el boton "Reportar" en una publicacion visible.
-2. El frontend muestra un cuadro de texto para introducir el motivo.
-3. El backend verifica que la publicacion existe, esta en estado VISIBLE y que el usuario no es su autor.
-4. Se verifica que el usuario no ha reportado ya esa publicacion.
-5. Se registra el reporte en base de datos.
-6. Se cuenta el numero total de reportes acumulados para esa publicacion.
-7. Si el numero de reportes es inferior al limite (3), la publicacion permanece visible y se confirma la accion al usuario indicando cuantos reportes quedan para el umbral.
-8. Si se alcanza el limite, la publicacion se oculta automaticamente.
+Si el total iguala o supera el limite, la publicacion pasa a estado OCULTA de forma automatica, se publica el evento `publicacion_ocultada` (que llama a FakeServicioBusqueda para eliminarla del indice y a FakeServicioNotificaciones para avisar a los administradores) y el frontend recarga la pagina, haciendo que la publicacion desaparezca.
 
-**Flujos alternativos:**
-
-- **Publicacion eliminada o ya oculta (3a):** el backend devuelve 404. No se registra ningun reporte.
-- **Autorreporte:** el backend devuelve 403. No se puede reportar la propia publicacion.
-- **Reporte duplicado:** el backend devuelve 409. Un usuario no puede reportar la misma publicacion mas de una vez.
-- **Limite alcanzado (6a):** la publicacion pasa a estado OCULTA, se publica el evento `publicacion_ocultada`, el FakeServicioBusqueda la elimina del indice de busqueda y el FakeServicioNotificaciones genera una alerta urgente para los administradores.
-
-**Avisos progresivos en el frontend:**
-
-El frontend muestra mensajes especificos segun los reportes restantes hasta el umbral:
-
-- Con 2 reportes restantes: "Reporte enviado. Faltan 2 reportes para ocultar la publicacion."
-- Con 1 reporte restante: "Reporte enviado. Con 1 reporte mas esta publicacion sera ocultada."
-- Cuando se oculta: "La publicacion ha sido ocultada por exceso de reportes" y la pagina se recarga automaticamente.
-
-**Efectos sobre la visibilidad:**
-
-Las publicaciones en estado OCULTA no aparecen en el listado principal de preguntas ni en el detalle de sus respuestas. Si se intenta acceder directamente a una pregunta oculta por URL, el backend devuelve 403. Tampoco es posible publicar nuevas respuestas sobre una pregunta oculta.
-
----
+Validaciones:
+- Publicacion en estado ELIMINADA u OCULTA: 404 (no se puede reportar lo que no existe o ya esta bajo revision)
+- Autorreporte: 403
+- Reporte duplicado del mismo usuario sobre la misma publicacion: 409
 
 ### CU3 - Publicar una pregunta
 
-Un usuario registrado publica una nueva pregunta con titulo, cuerpo y etiquetas.
+Flujo normal: el usuario rellena el formulario con titulo (obligatorio), contenido (obligatorio) y una o varias etiquetas. El frontend valida los campos antes de enviar. El backend valida las etiquetas con FakeServicioEtiquetas, persiste la pregunta en PostgreSQL y emite `pregunta_publicada`, que FakeProyectorCQRS y FakeServicioBusqueda consumen para actualizar el modelo de lectura e indexar la pregunta respectivamente. El backend devuelve 201 y el frontend redirige al detalle de la pregunta recien creada.
 
-**Flujo principal:**
-
-1. El usuario rellena el formulario de nueva pregunta con titulo, contenido y una o varias etiquetas.
-2. El frontend valida que titulo y contenido no esten vacios antes de enviar.
-3. El backend valida las etiquetas con FakeServicioEtiquetas.
-4. Se persiste la pregunta en PostgreSQL y se emite el evento `pregunta_publicada`.
-5. FakeProyectorCQRS actualiza el modelo de lectura.
-6. FakeServicioBusqueda indexa la pregunta en el motor de busqueda simulado.
-7. El backend devuelve 201 Created con los datos de la pregunta creada.
-8. El frontend redirige directamente al detalle de la nueva pregunta.
-
-**Flujos alternativos:**
-
-- **Etiquetas invalidas (4a):** FakeServicioEtiquetas devuelve error y el usuario debe corregirlas (en la implementacion actual el fake siempre valida, ya que las etiquetas son un conjunto fijo conocido).
-- **Cancelacion:** el usuario puede abandonar el formulario en cualquier momento sin consecuencias.
-
-**Etiquetas disponibles:**
-
-| ID | Nombre |
-|---|---|
-| 1 | Java |
-| 2 | Spring Boot |
-| 3 | SQL |
-| 4 | JPA |
-| 5 | REST |
-| 6 | Docker |
-| 7 | Testing |
-| 8 | Frontend |
-
----
+Etiquetas disponibles: Java, Spring Boot, SQL, JPA, REST, Docker, Testing, Frontend.
 
 ### CU4 - Marcar respuesta como aceptada
 
-El autor de una pregunta marca una de las respuestas como aceptada, indicando que resuelve su problema.
+Flujo normal: el autor de la pregunta ve un boton "Aceptar" en cada respuesta mientras no haya ninguna aceptada. Al pulsar, el backend verifica que el solicitante es efectivamente el autor de la pregunta y que no habia aceptada ya. Marca la respuesta como `esAceptada = true`, actualiza `acceptedAnswerId` en la pregunta y emite `respuesta_aceptada`, que suma puntos de reputacion al autor de la respuesta, actualiza el modelo de lectura y le envia una notificacion.
 
-**Flujo principal:**
+En el detalle, la respuesta aceptada aparece con un fondo verde y la etiqueta "Respuesta aceptada" en la parte superior.
 
-1. El autor de la pregunta visualiza las respuestas recibidas y pulsa "Aceptar" en una de ellas.
-2. El backend verifica que el solicitante es el autor de la pregunta.
-3. Se verifica que la pregunta no tiene ya una respuesta aceptada.
-4. Se actualiza `esAceptada = true` en la respuesta y `acceptedAnswerId` en la pregunta.
-5. Se emite el evento `respuesta_aceptada`.
-6. FakeServicioUsuarios suma puntos de reputacion al autor de la respuesta.
-7. FakeProyectorCQRS actualiza el modelo de lectura.
-8. FakeServicioNotificaciones notifica al autor de la respuesta.
-9. El frontend recarga el detalle de la pregunta mostrando el distintivo visual en la respuesta aceptada.
+El autor de la pregunta puede deshacer la aceptacion pulsando "Quitar aceptada" sobre la respuesta marcada. Esto permite aceptar otra respuesta diferente si cambia de opinion.
 
-**Flujos alternativos:**
-
-- **No es el autor (3a):** el backend devuelve 403.
-- **Ya existe respuesta aceptada (5a):** el backend devuelve 409 con el mensaje "La pregunta ya tiene una respuesta aceptada. Puedes quitarla primero." El frontend muestra el boton "Quitar aceptada" sobre la respuesta actualmente aceptada.
-
-**Desaceptar respuesta:**
-
-El autor de la pregunta puede retirar la aceptacion de una respuesta pulsando "Quitar aceptada". El backend actualiza `esAceptada = false` y limpia `acceptedAnswerId`, publicando el evento `respuesta_desaceptada`. Esto permite posteriormente aceptar otra respuesta.
+Validaciones:
+- No es el autor de la pregunta: 403
+- Ya existe una respuesta aceptada: 409 con mensaje que indica que hay que quitarla primero
 
 ---
 
-## Estructura del codigo
+## Estructura del proyecto
 
 ```
 ingsoft_entregaDOO/
@@ -246,80 +233,80 @@ ingsoft_entregaDOO/
 |   +-- servicio-publicaciones/
 |   |   +-- src/main/java/com/grupok/publicaciones/
 |   |       +-- controller/
-|   |       |   +-- PreguntaController.java        CU3: GET+POST /preguntas, DELETE /preguntas/{id}
-|   |       |   +-- ReporteController.java         CU2: POST /publicaciones/{id}/reportes
-|   |       |   +-- RespuestaController.java       CU4: POST/DELETE /respuestas, PATCH /aceptar, PATCH /desaceptar
-|   |       |   +-- PublicacionController.java     CU1: PATCH /publicaciones/{id}/score
-|   |       |   +-- GlobalExceptionHandler.java    @RestControllerAdvice, errores como {"error":"..."}
+|   |       |   +-- PreguntaController.java         GET+POST /preguntas, DELETE /preguntas/{id}
+|   |       |   +-- RespuestaController.java        POST+DELETE /respuestas, PATCH /aceptar, PATCH /desaceptar
+|   |       |   +-- ReporteController.java          POST /publicaciones/{id}/reportes
+|   |       |   +-- PublicacionController.java      PATCH /publicaciones/{id}/score
+|   |       |   +-- GlobalExceptionHandler.java     errores uniformes como {"error":"..."}
 |   |       +-- service/
-|   |       |   +-- PreguntaService.java           CU3: publicar, listar, obtenerDetalle, eliminar
-|   |       |   +-- ReporteService.java            CU2: registrar reporte, ocultar si supera limite
-|   |       |   +-- RespuestaService.java          CU4: aceptar, desaceptar, publicar, eliminar
-|   |       |   +-- PublicacionService.java        CU1: actualizarScore (receptor del PATCH)
+|   |       |   +-- PreguntaService.java
+|   |       |   +-- RespuestaService.java
+|   |       |   +-- ReporteService.java
+|   |       |   +-- PublicacionService.java
 |   |       +-- repository/
 |   |       |   +-- PreguntaRepository.java
-|   |       |   +-- PublicacionRepository.java     query: findPreguntaByRespuestaId
-|   |       |   +-- ReporteRepository.java         countByPublicacionId, existsByUsuarioIdAndPublicacionId
-|   |       |   +-- RespuestaRepository.java       findByPreguntaId, countVisibleByPreguntaId
+|   |       |   +-- PublicacionRepository.java      query custom findPreguntaByRespuestaId
+|   |       |   +-- RespuestaRepository.java        countVisibleByPreguntaId (excluye OCULTA y ELIMINADA)
+|   |       |   +-- ReporteRepository.java          countByPublicacionId, existsByUsuarioIdAndPublicacionId
 |   |       +-- model/
-|   |       |   +-- Publicacion.java               @Entity base (JOINED inheritance)
-|   |       |   +-- Pregunta.java                  extends Publicacion
-|   |       |   +-- Respuesta.java                 extends Publicacion, @ManyToOne Pregunta
-|   |       |   +-- Reporte.java                   @Entity independiente
-|   |       |   +-- EstadoPublicacion.java         enum: VISIBLE, OCULTA, ELIMINADA
+|   |       |   +-- Publicacion.java                entidad base con InheritanceType.JOINED
+|   |       |   +-- Pregunta.java
+|   |       |   +-- Respuesta.java
+|   |       |   +-- Reporte.java
+|   |       |   +-- EstadoPublicacion.java          enum VISIBLE / OCULTA / ELIMINADA
 |   |       +-- dto/
-|   |       |   +-- PublicarPreguntaRequest.java   record(usuarioId, titulo, contenido, etiquetaIds)
-|   |       |   +-- PublicarRespuestaRequest.java  record(usuarioId, preguntaId, contenido)
-|   |       |   +-- AceptarRespuestaRequest.java   record(usuarioId)
-|   |       |   +-- ReportarPublicacionRequest.java  record(usuarioId, motivo)
-|   |       |   +-- ReporteResultadoDto.java       record(numReportes, reportesRestantes, publicacionOculta)
-|   |       |   +-- PreguntaResumenDto.java        para la lista de preguntas
-|   |       |   +-- PreguntaDetalleDto.java        para el detalle (pregunta + respuestas)
+|   |       |   +-- PublicarPreguntaRequest.java
+|   |       |   +-- PublicarRespuestaRequest.java
+|   |       |   +-- AceptarRespuestaRequest.java
+|   |       |   +-- ReportarPublicacionRequest.java
+|   |       |   +-- ReporteResultadoDto.java        numReportes, reportesRestantes, publicacionOculta
+|   |       |   +-- PreguntaResumenDto.java
+|   |       |   +-- PreguntaDetalleDto.java
 |   |       +-- fake/
-|   |       |   +-- FakeMessageBroker.java         enruta eventos a consumidores fake
-|   |       |   +-- FakeServicioEtiquetas.java     validarEtiquetas (CU3, sincrono)
-|   |       |   +-- FakeServicioUsuarios.java      sumarPuntosReputacion (CU4, asincrono)
-|   |       |   +-- FakeServicioNotificaciones.java  notificarAutorRespuesta, notificarAdministradores
-|   |       |   +-- FakeServicioBusqueda.java      indexarEnElasticsearch, eliminarDelIndice
-|   |       |   +-- FakeProyectorCQRS.java         actualizarModeloLectura (CU3+CU4+CU2)
+|   |       |   +-- FakeMessageBroker.java
+|   |       |   +-- FakeServicioEtiquetas.java
+|   |       |   +-- FakeServicioUsuarios.java
+|   |       |   +-- FakeServicioNotificaciones.java   notificarAutorRespuesta + notificarAdministradores
+|   |       |   +-- FakeServicioBusqueda.java         indexarEnElasticsearch + eliminarDelIndice
+|   |       |   +-- FakeProyectorCQRS.java
 |   |       +-- config/
-|   |       |   +-- CorsConfig.java               permite peticiones desde cualquier origen
-|   |       +-- DataSourceConfig.java             configuracion HikariCP para Railway (DATABASE_URL)
+|   |       |   +-- CorsConfig.java
+|   |       +-- DataSourceConfig.java               HikariCP con soporte para DATABASE_URL de Railway
 |   |
 |   +-- servicio-votaciones/
 |       +-- src/main/java/com/grupok/votaciones/
 |           +-- controller/
-|           |   +-- VotoController.java           CU1: POST /votos, GET /votos/scores
-|           |   +-- GlobalExceptionHandler.java   @RestControllerAdvice
+|           |   +-- VotoController.java             POST /votos, GET /votos/scores
+|           |   +-- GlobalExceptionHandler.java
 |           +-- service/
-|           |   +-- VotoService.java              CU1: emitirVoto, calcularScores
+|           |   +-- VotoService.java                emitirVoto, calcularScores
 |           +-- repository/
-|           |   +-- VotoRepository.java           findByUsuarioIdAndRespuestaId, findAllByRespuestaId, findAllByRespuestaIdIn
+|           |   +-- VotoRepository.java
 |           +-- model/
 |           |   +-- Voto.java
 |           +-- dto/
-|           |   +-- EmitirVotoRequest.java        record(usuarioId, respuestaId, valor, autorRespuestaId)
+|           |   +-- EmitirVotoRequest.java          incluye autorRespuestaId para verificar autovoto sin llamada inter-servicio
 |           +-- config/
 |           |   +-- CorsConfig.java
-|           |   +-- RestTemplateConfig.java       RestTemplate con soporte PATCH (HttpComponents)
+|           |   +-- RestTemplateConfig.java         RestTemplate con HttpComponentsClientHttpRequestFactory (necesario para PATCH)
 |           +-- fake/
-|               +-- FakeMessageBroker.java        enruta VotoEmitido/VotoRetirado/VotoCambiado
-|               +-- FakeServicioReputacion.java   actualizarReputacion (CU1, asincrono)
-|               +-- FakeServicioNotificaciones.java  notificarAutorVoto (CU1, asincrono)
+|               +-- FakeMessageBroker.java
+|               +-- FakeServicioReputacion.java
+|               +-- FakeServicioNotificaciones.java
 |
 +-- frontend/
-    +-- index.html                               Listado de preguntas
-    +-- pregunta.html                            Detalle de pregunta y respuestas
-    +-- nueva-pregunta.html                      Formulario de nueva pregunta
-    +-- login.html                               Identificacion por ID de usuario
+    +-- index.html                                  Listado de preguntas
+    +-- pregunta.html                               Detalle de pregunta y respuestas
+    +-- nueva-pregunta.html                         Formulario nueva pregunta
+    +-- login.html                                  Identificacion
     +-- css/
     |   +-- styles.css
     +-- js/
-        +-- config.js                            URLs de los microservicios (local/produccion)
-        +-- api.js                               Helper HTTP, funciones de auth, toasts
-        +-- index.js                             Logica de la pagina principal
-        +-- pregunta.js                          Logica del detalle: votar, aceptar, reportar, eliminar
-        +-- nueva-pregunta.js                    Logica del formulario de nueva pregunta
+        +-- config.js                               URLs de los microservicios
+        +-- api.js                                  Helper HTTP, auth, toasts, escape HTML
+        +-- index.js
+        +-- pregunta.js
+        +-- nueva-pregunta.js
 ```
 
 ---
@@ -328,27 +315,32 @@ ingsoft_entregaDOO/
 
 ### servicio-publicaciones
 
+La herencia entre `Pregunta` y `Respuesta` se implementa con `InheritanceType.JOINED` de JPA: existe una tabla `publicacion` con los campos comunes y tablas separadas `pregunta` y `respuesta` con sus campos especificos.
+
 ```
-Publicacion  (tabla base, InheritanceType.JOINED)
-  id              BIGINT  PK
+publicacion  (tabla base)
+  id              BIGINT      PK, autogenerado
   autor_id        BIGINT
-  score           INT     (actualizado por servicio-votaciones via PATCH)
-  estado          VARCHAR (VISIBLE | OCULTA | ELIMINADA)
+  score           INT         actualizado por PATCH desde servicio-votaciones
+  estado          VARCHAR     VISIBLE | OCULTA | ELIMINADA  (default VISIBLE)
   fecha_creacion  TIMESTAMP
 
-Pregunta  (extiende Publicacion)
+pregunta  (extiende publicacion)
   titulo              VARCHAR
   contenido           TEXT
-  accepted_answer_id  BIGINT  (null si no hay respuesta aceptada)
-  etiqueta_ids        @ElementCollection -> tabla pregunta_etiqueta_ids
+  accepted_answer_id  BIGINT   null mientras no haya respuesta aceptada
 
-Respuesta  (extiende Publicacion)
+pregunta_etiqueta_ids  (coleccion de pregunta)
+  pregunta_id   BIGINT   FK -> pregunta
+  etiqueta_ids  BIGINT
+
+respuesta  (extiende publicacion)
   contenido    TEXT
-  es_aceptada  BOOLEAN
-  pregunta_id  BIGINT  FK -> Pregunta
+  es_aceptada  BOOLEAN   false por defecto
+  pregunta_id  BIGINT    FK -> pregunta
 
-Reporte
-  id              BIGINT  PK
+reporte  (tabla independiente)
+  id              BIGINT   PK, autogenerado
   publicacion_id  BIGINT
   usuario_id      BIGINT
   motivo          VARCHAR
@@ -356,42 +348,42 @@ Reporte
 
 **Estados de publicacion:**
 
-| Estado | Significado |
+| Estado | Descripcion |
 |---|---|
-| VISIBLE | Publicacion accesible y visible para todos |
-| OCULTA | Ocultada automaticamente por superar el limite de reportes; no se muestra ni en listados ni en detalle; no admite nuevos reportes ni nuevas respuestas |
-| ELIMINADA | Borrada por su autor (soft delete); no se muestra ni se puede acceder |
+| VISIBLE | Publicacion normal, accesible y visible para todos |
+| OCULTA | Ocultada automaticamente al superar el limite de reportes. No aparece en listados ni en detalle. No admite nuevos reportes ni nuevas respuestas. Si se accede por URL directa devuelve 403. |
+| ELIMINADA | Borrada por su autor mediante soft delete. No se muestra ni se puede acceder. Devuelve 404. |
 
 ### servicio-votaciones
 
 ```
-Voto
-  id            BIGINT  PK
+voto
+  id            BIGINT   PK, autogenerado
   usuario_id    BIGINT
   respuesta_id  BIGINT
-  valor         INT     (+1 o -1)
+  valor         INT      +1 o -1
 ```
 
-Un usuario solo puede tener un voto activo por respuesta. Si vota de nuevo con el mismo valor, el voto se retira. Si vota con el valor contrario, se sustituye atomicamente.
+Restriccion de negocio: un usuario solo puede tener un voto activo por respuesta. El par `(usuario_id, respuesta_id)` es efectivamente unico en cualquier momento dado.
 
 ---
 
-## API - Endpoints
+## API - Referencia de endpoints
 
 ### servicio-publicaciones (puerto 8081)
 
 | Metodo | Ruta | Descripcion | CU |
 |---|---|---|---|
-| `GET` | `/preguntas` | Listar preguntas visibles con numero de respuestas | CU3 |
-| `POST` | `/preguntas` | Publicar nueva pregunta | CU3 |
-| `GET` | `/preguntas/{id}` | Detalle de pregunta con sus respuestas visibles | CU3/CU4 |
-| `DELETE` | `/preguntas/{id}?usuarioId=X` | Eliminar pregunta (solo el autor) | - |
-| `POST` | `/respuestas` | Publicar respuesta a una pregunta | - |
-| `PATCH` | `/respuestas/{id}/aceptar` | Marcar respuesta como aceptada | CU4 |
-| `PATCH` | `/respuestas/{id}/desaceptar` | Retirar aceptacion de una respuesta | CU4 ext.5a |
-| `DELETE` | `/respuestas/{id}?usuarioId=X` | Eliminar respuesta (autor o autor de la pregunta) | - |
-| `POST` | `/publicaciones/{id}/reportes` | Reportar una publicacion | CU2 |
-| `PATCH` | `/publicaciones/{id}/score` | Actualizar score (llamado internamente por servicio-votaciones) | CU1 |
+| GET | `/preguntas` | Lista todas las preguntas visibles con resumen | CU3 |
+| POST | `/preguntas` | Publica una nueva pregunta | CU3 |
+| GET | `/preguntas/{id}` | Detalle de una pregunta con sus respuestas visibles | CU3/CU4 |
+| DELETE | `/preguntas/{id}?usuarioId=X` | Elimina la pregunta (solo el autor) | - |
+| POST | `/respuestas` | Publica una respuesta a una pregunta | - |
+| PATCH | `/respuestas/{id}/aceptar` | Marca la respuesta como aceptada | CU4 |
+| PATCH | `/respuestas/{id}/desaceptar` | Retira la aceptacion de una respuesta | CU4 ext. |
+| DELETE | `/respuestas/{id}?usuarioId=X` | Elimina la respuesta (autor o autor de la pregunta) | - |
+| POST | `/publicaciones/{id}/reportes` | Reporta una publicacion | CU2 |
+| PATCH | `/publicaciones/{id}/score` | Actualiza el score (llamado por servicio-votaciones) | CU1 |
 
 #### POST /preguntas
 
@@ -399,18 +391,19 @@ Un usuario solo puede tener un voto activo por respuesta. Si vota de nuevo con e
 // Request
 {
   "usuarioId": 1,
-  "titulo": "Como funciona JPA con herencia JOINED?",
-  "contenido": "Estoy implementando...",
+  "titulo": "Como configurar JPA con herencia JOINED en Spring Boot?",
+  "contenido": "Tengo dos entidades que heredan de una base...",
   "etiquetaIds": [2, 4]
 }
+
 // Response 201
 {
   "id": 42,
   "autorId": 1,
   "score": 0,
   "estado": "VISIBLE",
-  "titulo": "Como funciona JPA con herencia JOINED?",
-  "contenido": "Estoy implementando...",
+  "titulo": "Como configurar JPA con herencia JOINED en Spring Boot?",
+  "contenido": "Tengo dos entidades que heredan de una base...",
   "etiquetaIds": [2, 4],
   "fechaCreacion": "2026-05-24T10:30:00"
 }
@@ -428,7 +421,7 @@ Un usuario solo puede tener un voto activo por respuesta. Si vota de nuevo con e
     "titulo": "...",
     "contenido": "...",
     "etiquetaIds": [2, 4],
-    "acceptedAnswerId": null,
+    "acceptedAnswerId": 7,
     "fechaCreacion": "2026-05-24T10:30:00",
     "estado": "VISIBLE"
   },
@@ -438,7 +431,7 @@ Un usuario solo puede tener un voto activo por respuesta. Si vota de nuevo con e
       "autorId": 3,
       "score": 2,
       "contenido": "...",
-      "esAceptada": false,
+      "esAceptada": true,
       "preguntaId": 42,
       "estado": "VISIBLE"
     }
@@ -450,31 +443,24 @@ Un usuario solo puede tener un voto activo por respuesta. Si vota de nuevo con e
 
 ```json
 // Request
-{ "usuarioId": 2, "motivo": "Contenido inapropiado" }
+{ "usuarioId": 2, "motivo": "Contenido ofensivo" }
+
 // Response 200
 {
-  "numReportes": 1,
-  "reportesRestantes": 2,
+  "numReportes": 2,
+  "reportesRestantes": 1,
   "publicacionOculta": false
 }
 ```
 
-#### PATCH /respuestas/{id}/aceptar y /desaceptar
-
-```json
-// Request
-{ "usuarioId": 1 }
-// Response 200 (sin cuerpo)
-```
-
----
+Cuando `publicacionOculta` es `true`, la publicacion ha sido ocultada automaticamente.
 
 ### servicio-votaciones (puerto 8082)
 
 | Metodo | Ruta | Descripcion | CU |
 |---|---|---|---|
-| `POST` | `/votos` | Emitir voto sobre una respuesta | CU1 |
-| `GET` | `/votos/scores?ids=1,2,3` | Obtener scores actuales de varias respuestas | CU1 |
+| POST | `/votos` | Emite un voto sobre una respuesta | CU1 |
+| GET | `/votos/scores?ids=1,2,3` | Devuelve los scores actuales de varias respuestas | CU1 |
 
 #### POST /votos
 
@@ -486,19 +472,18 @@ Un usuario solo puede tener un voto activo por respuesta. Si vota de nuevo con e
   "valor": 1,
   "autorRespuestaId": 3
 }
+
 // Response 200
 { "nuevoScore": 3 }
 ```
 
-El campo `autorRespuestaId` es enviado por el frontend y permite al backend verificar el autovoto sin necesidad de una llamada adicional a servicio-publicaciones.
+Comportamiento segun el estado previo del voto del usuario sobre esa respuesta:
 
-Comportamiento segun el estado previo del voto:
-
-| Situacion | Resultado | Evento publicado |
+| Situacion | Accion | Evento publicado |
 |---|---|---|
-| Sin voto previo | Se registra el voto | `VotoEmitido` |
-| Mismo voto ya registrado | Se retira el voto | `VotoRetirado` |
-| Voto contrario ya registrado | Se sustituye el voto | `VotoCambiado` |
+| Sin voto previo | Se registra el voto | VotoEmitido |
+| Mismo tipo de voto ya registrado | Se retira el voto | VotoRetirado |
+| Tipo de voto contrario ya registrado | Se sustituye en una sola operacion | VotoCambiado |
 
 #### GET /votos/scores?ids=1,2,3
 
@@ -511,131 +496,64 @@ Comportamiento segun el estado previo del voto:
 }
 ```
 
-El frontend llama a este endpoint cada vez que carga el detalle de una pregunta para mostrar los scores reales calculados desde los votos almacenados.
-
----
-
 ### Codigos de error
 
-Todos los errores devuelven JSON con el campo `error`:
+Todos los errores devuelven la misma estructura:
 
 ```json
-{ "error": "Descripcion del error" }
+{ "error": "Descripcion legible del error" }
 ```
 
-| HTTP | Situacion |
+| HTTP | Cuando ocurre |
 |---|---|
-| 400 | Datos invalidos en la peticion (campo obligatorio ausente, valor fuera de rango) |
-| 403 | Sin permiso: autovoto, autorreporte, o accion reservada al autor |
-| 404 | Entidad no encontrada o en estado ELIMINADA/OCULTA |
-| 409 | Conflicto: voto duplicado, reporte duplicado, o pregunta ya tiene respuesta aceptada |
-| 503 | servicio-publicaciones no accesible para verificar el autor (solo si `autorRespuestaId` no se envia) |
+| 400 | Campo obligatorio ausente o valor invalido (por ejemplo, valor de voto distinto de +1 o -1) |
+| 403 | Operacion no permitida: autovoto, autorreporte, o accion reservada al autor |
+| 404 | La entidad no existe, ha sido eliminada o esta en estado OCULTA |
+| 409 | Conflicto de estado: reporte duplicado, pregunta ya tiene respuesta aceptada |
 
 ---
 
-## Frontend
+## Despliegue
 
-El frontend es una aplicacion de paginas estaticas en HTML, CSS y JavaScript vanilla, sin frameworks ni dependencias de build. Se comunica directamente con los dos microservicios via fetch API.
+### Backend en Railway
 
-### Paginas
+Ambos microservicios estan desplegados como servicios independientes en Railway, cada uno con su propio plugin de PostgreSQL. Railway gestiona automaticamente el ciclo de vida de los contenedores y las variables de entorno de la base de datos.
 
-| Pagina | Archivo | Descripcion |
-|---|---|---|
-| Identificacion | `login.html` | El usuario introduce su ID numerico para identificarse (sin contrasena, sistema fake de autenticacion) |
-| Listado de preguntas | `index.html` | Muestra todas las preguntas visibles con numero de respuestas, etiquetas, autor y fecha. Indica si la pregunta tiene respuesta aceptada. |
-| Detalle de pregunta | `pregunta.html` | Muestra el contenido de la pregunta, sus respuestas con score y botones de accion, y el formulario para publicar una nueva respuesta |
-| Nueva pregunta | `nueva-pregunta.html` | Formulario con titulo, contenido y selector de etiquetas |
+El proceso de despliegue es el siguiente: Railway detecta el `pom.xml` en la raiz del servicio, compila el proyecto con Maven y ejecuta el JAR resultante. El puerto lo gestiona Railway mediante la variable `PORT`, que Spring Boot lee con `server.port=${PORT:8081}`.
 
-### Funcionalidades del frontend
+**Variables de entorno en servicio-publicaciones:**
 
-**Votacion:**
-- Botones de voto positivo (+1) y negativo (-1) sobre cada respuesta
-- El score se actualiza inmediatamente tras el voto sin recargar la pagina
-- Al recargar, el score se obtiene desde servicio-votaciones (`GET /votos/scores`) como fuente de verdad
-- El autor de una respuesta no puede votar su propia respuesta (bloqueado en backend y senalizado con error en frontend)
-- Votar dos veces con el mismo valor retira el voto
-- Votar con valor contrario cambia el voto
+| Variable | Descripcion |
+|---|---|
+| `DATABASE_URL` | URL completa de PostgreSQL en formato `postgresql://user:pass@host:port/db`. Railway la inyecta automaticamente al conectar el plugin de base de datos. |
+| `PORT` | Inyectada automaticamente por Railway. |
 
-**Reportes:**
-- Boton "Reportar" disponible en preguntas y respuestas
-- Se solicita motivo mediante un cuadro de texto
-- El frontend muestra avisos progresivos segun cuantos reportes quedan para el umbral de ocultado
-- Si la publicacion es ocultada, la pagina se recarga automaticamente y desaparece
+Railway proporciona la URL con credenciales inlineadas en el formato `postgresql://user:pass@host/db`. El driver JDBC de PostgreSQL no acepta este formato directamente. Para resolverlo, `DataSourceConfig.java` descompone la URL con `java.net.URI` y configura usuario y contrasena por separado en HikariCP, construyendo una URL JDBC limpia del tipo `jdbc:postgresql://host:port/db`.
 
-**Aceptar respuesta:**
-- Solo visible para el autor de la pregunta, unicamente si no hay respuesta aceptada
-- Tras aceptar, aparece el distintivo visual "Respuesta aceptada" y el boton "Quitar aceptada"
-- El autor puede retirar la aceptacion para poder aceptar otra respuesta diferente
+**Variables de entorno en servicio-votaciones:**
 
-**Eliminar:**
-- El autor de una pregunta puede eliminarla; se redirige al listado tras la eliminacion
-- El autor de una respuesta, o el autor de la pregunta, pueden eliminar esa respuesta
+Railway inyecta automaticamente `PGHOST`, `PGPORT`, `PGDATABASE`, `PGUSER` y `PGPASSWORD` al conectar el plugin de PostgreSQL, y el `application.properties` las lee directamente. La unica variable que hay que configurar manualmente es:
 
-**Identificacion:**
-- Sistema fake basado en localStorage: el usuario introduce un ID numerico cualquiera
-- Todas las paginas redirigen a login si no hay sesion activa
-- Boton "Salir" en el encabezado de todas las paginas autenticadas
+| Variable | Descripcion |
+|---|---|
+| `PUBLICACIONES_URL` | URL publica de servicio-publicaciones en Railway (por ejemplo, `https://publicaciones-production.up.railway.app`). Necesaria para que CU1 actualice el score en la base de datos de publicaciones. |
 
-### Configuracion de URLs
+Si `PUBLICACIONES_URL` no esta configurada, el PATCH de actualizacion de score fallara silenciosamente. Los votos se siguen guardando y el score se calcula en tiempo real desde la base de datos de votaciones, por lo que la aplicacion funciona correctamente de cara al usuario.
 
-Las URLs de los microservicios se configuran en `frontend/js/config.js`:
+### Frontend en Netlify
+
+El frontend es un conjunto de archivos estaticos que no requiere proceso de build. El despliegue en Netlify consiste en subir el contenido de la carpeta `frontend/` y configurar la carpeta raiz del proyecto como directorio de publicacion.
+
+Antes de subir hay que asegurarse de que `frontend/js/config.js` contiene las URLs de produccion de Railway:
 
 ```javascript
-// Para desarrollo local
-window.CONF = {
-  API_PUB: 'http://localhost:8081',
-  API_VOT: 'http://localhost:8082'
-};
-
-// Para produccion (Railway)
 window.CONF = {
   API_PUB: 'https://publicaciones-production.up.railway.app',
   API_VOT: 'https://votaciones-production.up.railway.app'
 };
 ```
 
-El resto del codigo JavaScript lee estas URLs desde `window.CONF`, de modo que cambiar el entorno solo requiere modificar este fichero.
-
----
-
-## Despliegue en produccion
-
-### Backend (Railway)
-
-Ambos microservicios estan desplegados en Railway. Cada uno tiene su propia instancia de PostgreSQL gestionada por el plugin de Railway.
-
-**Variables de entorno necesarias en Railway:**
-
-Para servicio-publicaciones:
-
-| Variable | Descripcion |
-|---|---|
-| `DATABASE_URL` | URL completa de PostgreSQL en formato `postgresql://user:pass@host:port/db` |
-| `PORT` | Puerto asignado por Railway (se inyecta automaticamente) |
-
-Para servicio-votaciones:
-
-| Variable | Descripcion |
-|---|---|
-| `PGHOST` | Host de PostgreSQL (inyectado por el plugin) |
-| `PGPORT` | Puerto de PostgreSQL (inyectado por el plugin) |
-| `PGDATABASE` | Nombre de la base de datos (inyectado por el plugin) |
-| `PGUSER` | Usuario de PostgreSQL (inyectado por el plugin) |
-| `PGPASSWORD` | Contrasena de PostgreSQL (inyectado por el plugin) |
-| `PUBLICACIONES_URL` | URL publica de servicio-publicaciones en Railway (necesaria para CU1) |
-| `PORT` | Puerto asignado por Railway |
-
-**Nota sobre `DATABASE_URL` en servicio-publicaciones:**
-
-Railway inyecta la URL en formato `postgresql://user:pass@host:port/db`. El driver JDBC de PostgreSQL no acepta credenciales inlineadas en la URL. `DataSourceConfig.java` descompone la URL con `java.net.URI` y configura usuario y contrasena por separado en HikariCP.
-
-**Nota sobre `PUBLICACIONES_URL` en servicio-votaciones:**
-
-Si esta variable no esta configurada, el score de las respuestas en la base de datos de servicio-publicaciones no se actualizara. Sin embargo, el sistema no falla: los votos se siguen registrando correctamente y el score se calcula en tiempo real desde los votos de la base de datos de servicio-votaciones.
-
-### Frontend (Netlify)
-
-El frontend se despliega en Netlify como sitio estatico. Solo es necesario subir el contenido de la carpeta `frontend/` con la URL de produccion ya configurada en `config.js`.
+Netlify sirve los archivos directamente sin configuracion adicional. El dominio asignado al proyecto es `foro-developers-soft.netlify.app`.
 
 ---
 
@@ -645,44 +563,42 @@ El frontend se despliega en Netlify como sitio estatico. Solo es necesario subir
 
 - Java 21
 - Maven 3.9 o superior
-- PostgreSQL 15 o superior corriendo en `localhost:5432`
+- PostgreSQL corriendo en `localhost:5432`
 
-### Crear las bases de datos
+### Base de datos
 
 ```sql
 CREATE DATABASE foro_publicaciones;
 CREATE DATABASE foro_votaciones;
 ```
 
-Las tablas las crea Hibernate automaticamente al arrancar cada servicio (`spring.jpa.hibernate.ddl-auto=update`).
+Hibernate crea las tablas automaticamente al arrancar cada servicio (`spring.jpa.hibernate.ddl-auto=update`). No hace falta ejecutar ningun script SQL.
 
-### Arrancar servicio-publicaciones
+### Arrancar los servicios
 
 ```bash
+# Terminal 1
 cd backend/servicio-publicaciones
 mvn spring-boot:run
-# Escucha en http://localhost:8081
-```
+# API disponible en http://localhost:8081
 
-### Arrancar servicio-votaciones
-
-```bash
+# Terminal 2
 cd backend/servicio-votaciones
 mvn spring-boot:run
-# Escucha en http://localhost:8082
+# API disponible en http://localhost:8082
 ```
 
-Se recomienda arrancar `servicio-publicaciones` antes que `servicio-votaciones`, ya que este ultimo le hace llamadas HTTP para actualizar scores en CU1.
+Conviene arrancar `servicio-publicaciones` primero porque `servicio-votaciones` le hace llamadas HTTP al procesar votos. Si se arranca en orden inverso la aplicacion funciona igual, pero el score almacenado en publicaciones no se actualizara hasta que publicaciones este disponible.
 
-### Abrir el frontend
+### Frontend
 
-Abrir `frontend/index.html` directamente en el navegador o servir la carpeta con cualquier servidor HTTP estatico. Asegurarse de que `config.js` apunte a las URLs locales antes de abrir.
+Abrir `frontend/index.html` directamente en el navegador o servirlo con cualquier servidor HTTP estatico (por ejemplo, la extension Live Server de VS Code). Verificar que `config.js` apunta a `localhost` antes de abrir.
 
 ---
 
-## Continuidad diagrama a codigo
+## Trazabilidad diagrama - codigo
 
-Los nombres de clases, metodos y rutas en el codigo corresponden con los participantes y mensajes de los diagramas de secuencia de la especificacion del proyecto:
+Los nombres de clases, metodos y rutas en el codigo son los mismos que los de los participantes y mensajes en los diagramas de secuencia de la especificacion del proyecto.
 
 | Participante en diagrama | Clase en codigo | Tipo Spring |
 |---|---|---|
@@ -705,7 +621,6 @@ Los nombres de clases, metodos y rutas en el codigo corresponden con los partici
 | control ":ProyectorCQRS" | `FakeProyectorCQRS` | `@Component` |
 | boundary "API de Etiquetas" | `FakeServicioEtiquetas` | `@Component` |
 | boundary "API de Usuarios" | `FakeServicioUsuarios` | `@Component` |
-| boundary "API de Notificaciones" (publicaciones) | `FakeServicioNotificaciones` (publicaciones) | `@Component` |
-| boundary "API de Notificaciones" (votaciones) | `FakeServicioNotificaciones` (votaciones) | `@Component` |
+| boundary "API de Notificaciones" | `FakeServicioNotificaciones` | `@Component` |
 | boundary "API de Busqueda" | `FakeServicioBusqueda` | `@Component` |
 | boundary "API de Reputacion" | `FakeServicioReputacion` | `@Component` |
