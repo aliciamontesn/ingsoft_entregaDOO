@@ -43,31 +43,39 @@ public class VotoService {
         return scores;
     }
 
-    // CU1: emitirVoto(usuarioId, respuestaId, valor)
+    // CU1: emitirVoto(usuarioId, respuestaId, valor, autorRespuestaId)
     @Transactional
-    public int emitirVoto(Long usuarioId, Long respuestaId, int valor) {
+    public int emitirVoto(Long usuarioId, Long respuestaId, int valor, Long autorRespuestaId) {
         if (valor != 1 && valor != -1) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El valor del voto debe ser +1 o -1");
         }
 
-        // CU1 paso 3: verificarNoAutovoto — consulta autorId de la respuesta
-        String urlRespuesta = publicacionesUrl + "/respuestas/" + respuestaId;
-        try {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> datos = restTemplate.getForObject(urlRespuesta, Map.class);
-            if (datos != null) {
-                Object autorIdObj = datos.get("autorId");
-                Long autorId = autorIdObj instanceof Number ? ((Number) autorIdObj).longValue() : null;
-                if (usuarioId.equals(autorId)) {
-                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No puedes votar tu propia respuesta");
+        // CU1 paso 3: verificarNoAutovoto — usar autorId enviado por el frontend (evita llamada inter-servicio)
+        if (autorRespuestaId != null && usuarioId.equals(autorRespuestaId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No puedes votar tu propia respuesta");
+        }
+
+        // Verificación secundaria contra servicio-publicaciones (si está accesible)
+        if (autorRespuestaId == null) {
+            String urlRespuesta = publicacionesUrl + "/respuestas/" + respuestaId;
+            try {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> datos = restTemplate.getForObject(urlRespuesta, Map.class);
+                if (datos != null) {
+                    Object autorIdObj = datos.get("autorId");
+                    Long autorId = autorIdObj instanceof Number ? ((Number) autorIdObj).longValue() : null;
+                    if (usuarioId.equals(autorId)) {
+                        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No puedes votar tu propia respuesta");
+                    }
                 }
+            } catch (ResponseStatusException e) {
+                throw e;
+            } catch (HttpClientErrorException.NotFound e) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Respuesta no encontrada: " + respuestaId);
+            } catch (Exception e) {
+                // servicio-publicaciones no accesible; no se puede verificar autovoto sin autorRespuestaId
+                throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "No se pudo verificar el autor de la respuesta");
             }
-        } catch (ResponseStatusException e) {
-            throw e;
-        } catch (HttpClientErrorException.NotFound e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Respuesta no encontrada: " + respuestaId);
-        } catch (Exception e) {
-            // No se puede alcanzar servicio-publicaciones; se omite la verificación de autovoto
         }
 
         // CU1 extensiones 4a/4b: lógica de voto previo

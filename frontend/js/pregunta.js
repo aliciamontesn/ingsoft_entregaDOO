@@ -97,9 +97,9 @@ function renderRespuestas() {
         ${aceptada ? '<div class="accepted-label">✓ Respuesta aceptada</div>' : ''}
         <div class="post-layout">
           <div class="vote-col">
-            <button class="vote-btn up" onclick="votar(${r.id},1)" title="+1">▲</button>
+            <button class="vote-btn up" onclick="votar(${r.id},1,${r.autorId})" title="+1">▲</button>
             <span class="vote-score" id="score-${r.id}">${r.score}</span>
-            <button class="vote-btn down" onclick="votar(${r.id},-1)" title="-1">▼</button>
+            <button class="vote-btn down" onclick="votar(${r.id},-1,${r.autorId})" title="-1">▼</button>
           </div>
           <div class="post-body">
             <div class="post-content">${esc(r.contenido)}</div>
@@ -124,9 +124,9 @@ function renderRespuestas() {
 }
 
 /* CU1 — votar */
-async function votar(respuestaId, valor) {
+async function votar(respuestaId, valor, autorRespuestaId) {
   try {
-    const res = await api.votar(getCurrentUserId(), respuestaId, valor);
+    const res = await api.votar(getCurrentUserId(), respuestaId, valor, autorRespuestaId);
     document.getElementById(`score-${respuestaId}`).textContent = res.nuevoScore;
     toast('Voto registrado', 'ok');
   } catch (e) {

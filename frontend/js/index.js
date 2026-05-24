@@ -21,9 +21,7 @@ async function cargarPreguntas() {
     lista.innerHTML = preguntas.map(q => `
       <div class="question-card">
         <div class="q-stats">
-          <span class="score">${q.score ?? 0}</span>
-          <span>puntos</span>
-          <span style="margin-top:6px;font-size:12px">${q.numRespuestas ?? 0}</span>
+          <span style="font-size:12px">${q.numRespuestas ?? 0}</span>
           <span>resp.</span>
           ${q.acceptedAnswerId ? '<span class="resolved-badge">✓</span>' : ''}
         </div>

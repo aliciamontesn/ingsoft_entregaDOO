@@ -60,8 +60,8 @@ const api = {
   reportar: (pubId, uid, motivo) => apiFetch(`${API_PUB}/publicaciones/${pubId}/reportes`,
     { method:'POST', body:JSON.stringify({ usuarioId: uid, motivo }) }),
 
-  votar: (uid, respuestaId, valor) => apiFetch(`${API_VOT}/votos`,
-    { method:'POST', body:JSON.stringify({ usuarioId: uid, respuestaId, valor }) }),
+  votar: (uid, respuestaId, valor, autorRespuestaId) => apiFetch(`${API_VOT}/votos`,
+    { method:'POST', body:JSON.stringify({ usuarioId: uid, respuestaId, valor, autorRespuestaId }) }),
 
   obtenerScores: (ids) => ids.length
     ? apiFetch(`${API_VOT}/votos/scores?ids=${ids.join(',')}`)

@@ -22,7 +22,7 @@ public class VotoController {
     // CU1: POST /votos {usuarioId, respuestaId, valor}
     @PostMapping("/votos")
     public ResponseEntity<Map<String, Object>> emitirVoto(@Valid @RequestBody EmitirVotoRequest request) {
-        int nuevoScore = votoService.emitirVoto(request.usuarioId(), request.respuestaId(), request.valor());
+        int nuevoScore = votoService.emitirVoto(request.usuarioId(), request.respuestaId(), request.valor(), request.autorRespuestaId());
         return ResponseEntity.ok(Map.of("nuevoScore", nuevoScore));
     }
 
