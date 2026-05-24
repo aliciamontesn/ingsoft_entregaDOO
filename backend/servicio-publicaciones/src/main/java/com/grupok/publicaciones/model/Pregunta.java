@@ -6,7 +6,10 @@ import java.util.List;
 @Entity
 public class Pregunta extends Publicacion {
 
+    @Column(length = 500)
     private String titulo;
+
+    @Column(columnDefinition = "TEXT")
     private String contenido;
     private Long acceptedAnswerId;
 

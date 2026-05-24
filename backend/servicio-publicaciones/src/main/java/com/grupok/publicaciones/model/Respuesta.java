@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 @Entity
 public class Respuesta extends Publicacion {
 
+    @Column(columnDefinition = "TEXT")
     private String contenido;
     private boolean esAceptada = false;
 
