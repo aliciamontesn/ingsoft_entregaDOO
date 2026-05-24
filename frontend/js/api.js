@@ -62,6 +62,10 @@ const api = {
 
   votar: (uid, respuestaId, valor) => apiFetch(`${API_VOT}/votos`,
     { method:'POST', body:JSON.stringify({ usuarioId: uid, respuestaId, valor }) }),
+
+  obtenerScores: (ids) => ids.length
+    ? apiFetch(`${API_VOT}/votos/scores?ids=${ids.join(',')}`)
+    : Promise.resolve({}),
 };
 
 /* ── Toast ── */

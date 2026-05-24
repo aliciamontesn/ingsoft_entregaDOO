@@ -35,6 +35,14 @@ document.addEventListener('DOMContentLoaded', () => {
 async function cargar(id) {
   try {
     detalle = await api.obtenerPregunta(id);
+    // Sobrescribir scores con los valores reales del servicio-votaciones
+    const respuestaIds = (detalle.respuestas || []).map(r => r.id);
+    try {
+      const scores = await api.obtenerScores(respuestaIds);
+      (detalle.respuestas || []).forEach(r => {
+        if (scores[r.id] !== undefined) r.score = scores[r.id];
+      });
+    } catch (_) { /* si votaciones no está disponible, usar scores de publicaciones */ }
     renderPregunta();
     renderRespuestas();
   } catch (e) {
@@ -45,7 +53,7 @@ async function cargar(id) {
 function renderPregunta() {
   const q   = detalle.pregunta;
   const uid = getCurrentUserId();
-  document.title = q.titulo + ' — Foro Dev';
+  document.title = q.titulo + ' - Foro Dev';
   document.getElementById('pregunta-titulo').textContent = q.titulo;
   document.getElementById('pregunta-contenido').textContent = q.contenido;
   document.getElementById('breadcrumb-titulo').textContent =

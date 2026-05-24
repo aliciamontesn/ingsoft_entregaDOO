@@ -13,4 +13,7 @@ public interface VotoRepository extends JpaRepository<Voto, Long> {
 
     // CU1: calcular score local cuando servicio-publicaciones no está disponible
     java.util.List<Voto> findAllByRespuestaId(Long respuestaId);
+
+    // CU1: obtener votos de varias respuestas a la vez (para endpoint de scores)
+    java.util.List<Voto> findAllByRespuestaIdIn(java.util.Collection<Long> respuestaIds);
 }

@@ -11,8 +11,10 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class VotoService {
@@ -30,6 +32,15 @@ public class VotoService {
         this.votoRepository = votoRepository;
         this.fakeMessageBroker = fakeMessageBroker;
         this.restTemplate = restTemplate;
+    }
+
+    // CU1: calcularScores — suma de votos por respuesta (fuente de verdad del score)
+    public Map<Long, Integer> calcularScores(List<Long> respuestaIds) {
+        Map<Long, Integer> scores = respuestaIds.stream()
+                .collect(Collectors.toMap(id -> id, id -> 0));
+        votoRepository.findAllByRespuestaIdIn(respuestaIds)
+                .forEach(v -> scores.merge(v.getRespuestaId(), v.getValor(), Integer::sum));
+        return scores;
     }
 
     // CU1: emitirVoto(usuarioId, respuestaId, valor)
