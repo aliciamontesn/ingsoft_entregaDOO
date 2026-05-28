@@ -81,7 +81,6 @@
                                     <exclude>com/grupok/publicaciones/dto/*</exclude>
                                     <exclude>com/grupok/publicaciones/model/*</exclude>
                                     <exclude>com/grupok/publicaciones/fake/*</exclude>
-                                    <exclude>com/grupok/publicaciones/controller/*</exclude>
                                     <exclude>com/grupok/publicaciones/config/*</exclude>
                                     <exclude>com/grupok/publicaciones/ServicioPublicacionesApplication.class</exclude>
                                 </excludes>
