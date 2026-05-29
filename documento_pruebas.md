@@ -1,6 +1,6 @@
-# Documento de Pruebas — Grupo K
+# Documento de Pruebas - Grupo K
 
-Ingeniería del Software — Diseño Orientado a Objetos  
+Ingeniería del Software - Diseño Orientado a Objetos  
 Testing sobre los cuatro objetivos asignados al Grupo K.
 
 ---
