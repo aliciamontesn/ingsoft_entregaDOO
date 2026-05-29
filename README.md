@@ -151,7 +151,7 @@ Las pruebas cubren los cuatro objetivos indicados en la tarea de testing del Gru
 
 ### Ejecutar las pruebas
 
-Requisitos: Java 21 y Maven. **No se necesita base de datos** — los tests de unidad usan Mockito y los de integracion usan MockMvc, todo en memoria.
+Requisitos: Java 21 y Maven. **No se necesita base de datos** - los tests de unidad usan Mockito y los de integracion usan MockMvc, todo en memoria.
 
 ```bash
 cd backend/servicio-publicaciones
