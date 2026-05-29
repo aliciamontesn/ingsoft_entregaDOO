@@ -165,12 +165,16 @@ mvn test
 
 ### Ver el informe de cobertura (JaCoCo)
 
-Tras ejecutar `mvn test`, abrir en el navegador:
+La carpeta `target/` no esta en el repositorio (la excluye `.gitignore`). Hay que ejecutar `mvn test` primero para generarla.
+
+Una vez ejecutado, abrir el informe haciendo **doble clic** en el archivo desde el explorador de archivos del sistema operativo:
 
 ```
 backend/servicio-publicaciones/target/site/jacoco/index.html
 backend/servicio-votaciones/target/site/jacoco/index.html
 ```
+
+Alternativamente, desde el navegador: `Ctrl+O` y navegar hasta el archivo.
 
 El informe muestra la cobertura de instrucciones, ramas y lineas por paquete y clase. JaCoCo esta configurado en el `pom.xml` de cada servicio y se genera automaticamente al lanzar `mvn test`.
 
