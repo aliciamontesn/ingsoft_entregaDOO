@@ -91,6 +91,20 @@ class ReporteServiceTest {
     }
 
     @Test
+    void reportarPublicacion_FlujoExitoso_EnValorFrontera_DosReportesNoOculta() {
+        when(publicacionRepository.findById(100L)).thenReturn(Optional.of(publicacionMock));
+        when(reporteRepository.existsByUsuarioIdAndPublicacionId(5L, 100L)).thenReturn(false);
+        when(reporteRepository.countByPublicacionId(100L)).thenReturn(2L);
+
+        ReporteResultadoDto resultado = reporteService.reportarPublicacion(5L, 100L, "Segundo reporte");
+
+        assertNotNull(resultado);
+        verify(reporteRepository, times(1)).save(any(Reporte.class));
+        verify(publicacionMock, never()).setEstado(any());
+        verifyNoInteractions(fakeMessageBroker);
+    }
+
+    @Test
     void reportarPublicacion_FlujoExitoso_AlcanzaLimiteDeTresYSeOculta() {
         when(publicacionRepository.findById(100L)).thenReturn(Optional.of(publicacionMock));
         when(reporteRepository.existsByUsuarioIdAndPublicacionId(5L, 100L)).thenReturn(false);
