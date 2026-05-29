@@ -16,9 +16,10 @@ Foro tecnico para desarrolladores con arquitectura de microservicios en Spring B
 4. [Como usar la web](#como-usar-la-web)
 5. [Casos de uso implementados](#casos-de-uso-implementados)
 6. [Trazabilidad diagrama - codigo](#trazabilidad-diagrama---codigo)
-7. [Estructura del proyecto](#estructura-del-proyecto)
-8. [Despliegue](#despliegue)
-9. [Ejecucion en local](#ejecucion-en-local)
+7. [Pruebas y cobertura](#pruebas-y-cobertura)
+8. [Estructura del proyecto](#estructura-del-proyecto)
+9. [Despliegue](#despliegue)
+10. [Ejecucion en local](#ejecucion-en-local)
 
 ---
 
@@ -134,6 +135,44 @@ Para probar el sistema con distintos usuarios basta con pulsar "Salir" en el enc
 Los nombres de clases, metodos y rutas en el codigo son exactamente los mismos que los que aparecen en los diagramas de secuencia entregados. Si en el diagrama aparece el participante `:VotoService`, en el codigo existe la clase `VotoService.java` con ese mismo nombre. Si el diagrama muestra el mensaje `reportarPublicacion()`, ese es el nombre exacto del metodo en `ReporteService.java`. El objetivo es que seguir un caso de uso entre el diagrama y el codigo no requiera ninguna traduccion: se puede ir directamente de un participante del diagrama al fichero correspondiente.
 
 Esto aplica a todos los participantes: controladores (`@RestController`), servicios (`@Service`), repositorios (`@Repository`) y los servicios externos simulados (`@Component`), que en los diagramas aparecen como boundaries o queues y en el codigo son las clases `FakeMessageBroker`, `FakeServicioEtiquetas`, `FakeServicioBusqueda`, etc.
+
+---
+
+## Pruebas y cobertura
+
+Las pruebas cubren los cuatro objetivos indicados en la tarea de testing del Grupo K:
+
+| Objetivo | Clase de test | Servicio |
+|---|---|---|
+| `@PostMapping("/preguntas")` | `PreguntaIntegracionTest` | servicio-publicaciones |
+| `PreguntaService.obtenerDetalle()` | `PreguntaServiceTest` | servicio-publicaciones |
+| `ReporteService.reportarPublicacion()` | `ReporteServiceTest` | servicio-publicaciones |
+| `@PostMapping("/votos")` | `VotoIntegracionTest` | servicio-votaciones |
+
+### Ejecutar las pruebas
+
+Requisitos: Java 21 y Maven. **No se necesita base de datos** — los tests de unidad usan Mockito y los de integracion usan MockMvc, todo en memoria.
+
+```bash
+cd backend/servicio-publicaciones
+mvn test
+```
+
+```bash
+cd backend/servicio-votaciones
+mvn test
+```
+
+### Ver el informe de cobertura (JaCoCo)
+
+Tras ejecutar `mvn test`, abrir en el navegador:
+
+```
+backend/servicio-publicaciones/target/site/jacoco/index.html
+backend/servicio-votaciones/target/site/jacoco/index.html
+```
+
+El informe muestra la cobertura de instrucciones, ramas y lineas por paquete y clase. JaCoCo esta configurado en el `pom.xml` de cada servicio y se genera automaticamente al lanzar `mvn test`.
 
 ---
 
