@@ -96,7 +96,7 @@ Cada caso de prueba cubre al menos una clase de equivalencia. Los casos del tipo
 
 ---
 
-### 2.1 POST /preguntas — PreguntaIntegracionTest
+### 2.1 POST /preguntas - PreguntaIntegracionTest
 
 | CT | Clases cubiertas | Descripción | Resultado esperado |
 |----|-----------------|-------------|-------------------|
@@ -105,7 +105,7 @@ Cada caso de prueba cubre al menos una clase de equivalencia. Los casos del tipo
 
 ---
 
-### 2.2 POST /votos — VotoIntegracionTest
+### 2.2 POST /votos - VotoIntegracionTest
 
 | CT | Clases cubiertas | Descripción | Resultado esperado |
 |----|-----------------|-------------|-------------------|
@@ -114,7 +114,7 @@ Cada caso de prueba cubre al menos una clase de equivalencia. Los casos del tipo
 
 ---
 
-### 2.3 PreguntaService.obtenerDetalle — PreguntaServiceTest
+### 2.3 PreguntaService.obtenerDetalle - PreguntaServiceTest
 
 | CT | Clases cubiertas | Descripción | Resultado esperado |
 |----|-----------------|-------------|-------------------|
@@ -127,7 +127,7 @@ Cada caso de prueba cubre al menos una clase de equivalencia. Los casos del tipo
 
 ---
 
-### 2.4 ReporteService.reportarPublicacion — ReporteServiceTest
+### 2.4 ReporteService.reportarPublicacion - ReporteServiceTest
 
 | CT | Clases cubiertas | Descripción | Resultado esperado |
 |----|-----------------|-------------|-------------------|
@@ -154,15 +154,15 @@ Se aplica la técnica de caminos básicos (McCabe) sobre los dos métodos de ser
 ```
 N1 (entrada)
   |
-N2: findById(preguntaId) ── vacío ──> N3: throw 404 (salida)
+N2: findById(preguntaId) ─ vacío ─> N3: throw 404 (salida)
   |
   encontrada
   |
-N4: ¿estado == ELIMINADA? ── sí ──> N5: throw 404 (salida)
+N4: ¿estado == ELIMINADA? ─ sí ─> N5: throw 404 (salida)
   |
   no
   |
-N6: ¿estado == OCULTA? ── sí ──> N7: throw 403 (salida)
+N6: ¿estado == OCULTA? ─ sí ─> N7: throw 403 (salida)
   |
   no
   |
@@ -195,23 +195,23 @@ N9: return PreguntaDetalleDto (salida)
 ```
 N1 (entrada)
   |
-N2: findById(publicacionId) ── vacío ──> N3: throw 404 (salida)
+N2: findById(publicacionId) - vacío ─> N3: throw 404 (salida)
   |
   encontrada
   |
-N4: ¿estado == ELIMINADA? ── sí ──> N5: throw 404 (salida)
+N4: ¿estado == ELIMINADA? ─ sí ─> N5: throw 404 (salida)
   |
   no
   |
-N6: ¿estado == OCULTA? ── sí ──> N7: throw 404 (salida)
+N6: ¿estado == OCULTA? ─ sí ─> N7: throw 404 (salida)
   |
   no
   |
-N8: ¿usuarioId == autorId? ── sí ──> N9: throw 403 (salida)
+N8: ¿usuarioId == autorId? ─ sí ─> N9: throw 403 (salida)
   |
   no
   |
-N10: ¿existeReportePrevio? ── sí ──> N11: throw 409 (salida)
+N10: ¿existeReportePrevio? ─ sí ─> N11: throw 409 (salida)
   |
   no
   |
@@ -219,7 +219,7 @@ N12: save(reporte)
   |
 N13: countByPublicacionId
   |
-N14: ¿numReportes >= 3? ── sí ──> N15: ocultar publicación + publicar evento
+N14: ¿numReportes >= 3? ─ sí ─> N15: ocultar publicación + publicar evento
   |                                    |
   no                                   |
   |<────────────────────────────────────
